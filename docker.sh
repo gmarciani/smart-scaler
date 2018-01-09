@@ -1,0 +1,29 @@
+#!/bin/bash
+
+HOME_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+API_GATEWAY_DOCKER_PATH="${HOME_DIR}/services/api_gateway"
+API_GATEWAY_CONTAINER="smart_scaler_api_gateway"
+API_GATEWAY_PORT=18001
+
+AGENTS_MANAGER_DOCKER_PATH="${HOME_DIR}/services/agents_manager"
+AGENTS_MANAGER_CONTAINER="smart_scaler_agents_manager"
+AGENTS_MANAGER_PORT=18002
+
+REPO_MANAGER_DOCKER_PATH="${HOME_DIR}/services/repo_manager"
+REPO_MANAGER_CONTAINER="smart_scaler_repo_manager"
+REPO_MANAGER_PORT=18003
+
+##
+# BUILD
+##
+docker build -t ${API_GATEWAY_CONTAINER}:latest ${API_GATEWAY_DOCKER_PATH}
+docker build -t ${AGENTS_MANAGER_CONTAINER}:latest ${AGENTS_MANAGER_DOCKER_PATH}
+docker build -t ${REPO_MANAGER_PORT}:latest ${REPO_MANAGER_DOCKER_PATH}
+
+##
+# RUN
+##
+docker run -d -p ${API_GATEWAY_PORT}:${API_GATEWAY_PORT} ${API_GATEWAY_CONTAINER}
+docker run -d -p ${AGENTS_MANAGER_PORT}:${AGENTS_MANAGER_PORT} ${AGENTS_MANAGER_CONTAINER}
+docker run -d -p ${REPO_MANAGER_PORT}:${REPO_MANAGER_PORT} ${REPO_MANAGER_CONTAINER}
