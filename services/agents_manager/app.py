@@ -1,5 +1,5 @@
 from flask import Flask
-from services.repo_manager.api.base import base
+from services.agents_manager.api.base import base
 
 # Initialization
 app = Flask(__name__)
@@ -10,4 +10,4 @@ app.register_blueprint(base)
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=app.config["PORT"])
+    app.run(host="0.0.0.0", port=app.config["AGENTS_MANAGER_PORT"])

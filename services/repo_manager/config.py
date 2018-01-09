@@ -1,3 +1,15 @@
 class Default:
     DEBUG = True
-    PORT = 18003
+
+    API_GATEWAY_HOST = "localhost"
+    API_GATEWAY_PORT = 18001
+
+    AGENTS_MANAGER_HOST = "localhost"
+    AGENTS_MANAGER_PORT = 18002
+
+    REPO_MANAGER_HOST = "localhost"
+    REPO_MANAGER_PORT = 18003
+
+    REDIS_HOST = "localhost"
+    REDIS_PORT = 6379
+    REDIS_PASSWORD = "password"

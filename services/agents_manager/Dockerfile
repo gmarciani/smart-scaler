@@ -1,18 +1,25 @@
+# Smart Scaler / Agents Manager
+#
+# VENDOR                Giacomo Marciani
+# VERSION               1.0.0
+
 FROM ubuntu:latest
 
-MAINTAINER Giacomo Marciani "gmarciani@acm.org"
+LABEL Description="Scaler / Agents Manager" Vendor="Giacomo Marciani" Version="1.0.0"
 
 RUN apt-get update -y
 
 RUN apt-get install -y python-pip python-dev
 
-COPY ./requirements.txt /app/requirements.txt
+ADD . /app
 
 WORKDIR /app
 
+COPY ./requirements.txt ./requirements.txt
+
 RUN pip install -r requirements.txt
 
-COPY . /app
+EXPOSE 18002
 
 ENTRYPOINT [ "python" ]
 

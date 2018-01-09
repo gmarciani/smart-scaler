@@ -1,0 +1,60 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: smart_scaler
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: smart_scaler
+    spec:
+      containers:
+
+        - name: smart_scaler_api_getaway
+          args:
+          - python
+          - app.py
+          ports:
+          - containerPort: 18001
+          resources: {}
+          volumeMounts:
+          - mountPath: /code
+            name: .
+
+        - name: smart_scaler_agents_manager
+          args:
+          - python
+          - app.py
+          ports:
+          - containerPort: 18002
+          resources: {}
+          volumeMounts:
+          - mountPath: /code
+            name: .
+
+        - name: smart_scaler_repo_manager
+          args:
+          - python
+          - app.py
+          ports:
+          - containerPort: 18003
+          resources: {}
+          volumeMounts:
+          - mountPath: /code
+            name: .
+
+        - name: redis
+          image: redis
+          resources: {}
+
+      restartPolicy: Always
+
+      volumes:
+      - name: .
+        persistentVolumeClaim:
+          claimName: .
+
+status: {}

@@ -8,11 +8,12 @@ base = Blueprint("base", __name__)
 
 @base.route("/status")
 def status():
-    t_now = datetime.now()
 
-    res = jsonify({
-        "ts": t_now,
+    res_status = {
+        "ts": datetime.now(),
         "status": "OK"
-    })
+    }
 
-    return res
+    response = jsonify(res_status)
+
+    return response
