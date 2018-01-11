@@ -1,12 +1,14 @@
 from flask import Flask
-from services.repo_manager.api.base import base
+from api.status import status
+from api.core import core
 
 # Initialization
 app = Flask(__name__)
-app.config.from_object("services.repo_manager.config.Default")
+app.config.from_object("config.Default")
 
-# Blueprints
-app.register_blueprint(base)
+# Routes
+app.register_blueprint(status)
+app.register_blueprint(core)
 
 
 if __name__ == "__main__":

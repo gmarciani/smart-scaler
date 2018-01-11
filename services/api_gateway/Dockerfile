@@ -19,7 +19,7 @@ COPY ./requirements.txt ./requirements.txt
 
 RUN pip install -r requirements.txt
 
-EXPOSE 18002
+EXPOSE 18001
 
 ENTRYPOINT [ "python" ]
 

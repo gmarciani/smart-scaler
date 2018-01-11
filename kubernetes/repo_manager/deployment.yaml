@@ -1,0 +1,29 @@
+---
+apiVersion: extensions/v1beta2
+kind: Deployment
+
+metadata:
+  name: smart_scaler_repo_manager-deployment
+
+spec:
+  selector:
+    matchLabels:
+      app: smart_scaler
+      service: smart_scaler_repo_manager
+      role: repo_manager
+
+  replicas: 2
+
+  template:
+    metadata:
+      name: smart_scaler_repo_manager
+      labels:
+        app: smart_scaler
+        service: smart_scaler_repo_manager
+        role: repo_manager
+    spec:
+      containers:
+        - name: smart_scaler_repo_manager
+          image: smart_scaler_repo_manager:1.0.0
+          ports:
+          - containerPort: 18003

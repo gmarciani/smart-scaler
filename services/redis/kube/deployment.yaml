@@ -1,0 +1,31 @@
+---
+apiVersion: extensions/v1beta2
+kind: Deployment
+
+metadata:
+  name: smart_scaler_redis-deployment
+  namespace: default
+
+spec:
+  selector:
+    matchLabels:
+      app: smart_scaler
+      service: smart_scaler_redis
+      role: redis
+
+  replicas: 2
+
+  template:
+    metadata:
+      name: smart_scaler_redis
+      labels:
+        app: smart_scaler
+        service: smart_scaler_redis
+        role: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:latest
+          ports:
+          - containerPort: 6379
+

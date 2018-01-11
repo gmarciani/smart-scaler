@@ -12,4 +12,6 @@ class Default:
 
     REDIS_HOST = "localhost"
     REDIS_PORT = 6379
-    REDIS_PASSWORD = "password"
+
+    KUBERNETES_HOST = "localhost"
+    KUBERNETES_PORT = 18008

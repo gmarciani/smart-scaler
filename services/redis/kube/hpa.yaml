@@ -1,0 +1,23 @@
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+
+metadata:
+  name: smart_scaler_redis-hpa
+  namespace: default
+
+spec:
+
+  scaleTargetRef:
+    apiVersion: apps/v1beta1
+    kind: Deployment
+    name: smart_scaler_redis-deployment
+
+  minReplicas: 1
+  maxReplicas: 10
+
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 50
