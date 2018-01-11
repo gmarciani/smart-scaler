@@ -1,9 +1,14 @@
+import sys, os
 from flask import Flask
+_ppath = os.path.join(os.path.realpath(__file__), "..", "..")
+print(_ppath)
+sys.path.append(_ppath)
+
 from services.repo_manager.api.base import base
 
 # Initialization
 app = Flask(__name__)
-app.config.from_object("services.repo_manager.config.Default")
+app.config.from_object("config.Default")
 
 # Blueprints
 app.register_blueprint(base)

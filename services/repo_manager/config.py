@@ -10,6 +10,5 @@ class Default:
     REPO_MANAGER_HOST = "localhost"
     REPO_MANAGER_PORT = 18003
 
-    REDIS_HOST = "localhost"
+    REDIS_HOST = "redis"
     REDIS_PORT = 6379
-    REDIS_PASSWORD = "password"

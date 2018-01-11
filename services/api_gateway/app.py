@@ -1,9 +1,9 @@
 from flask import Flask
-from services.api_gateway.api.base import base
+from .api.base import base
 
 # Initialization
 app = Flask(__name__)
-app.config.from_object("services.api_gateway.config.Default")
+app.config.from_object("config.Default")
 
 # Blueprints
 app.register_blueprint(base)

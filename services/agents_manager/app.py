@@ -1,9 +1,9 @@
 from flask import Flask
-from services.agents_manager.api.base import base
+from .api.base import base
 
 # Initialization
 app = Flask(__name__)
-app.config.from_object("services.agents_manager.config.Default")
+app.config.from_object("config.Default")
 
 # Blueprints
 app.register_blueprint(base)

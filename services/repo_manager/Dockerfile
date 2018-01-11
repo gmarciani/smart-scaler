@@ -5,22 +5,25 @@
 
 FROM ubuntu:latest
 
-LABEL Description="Smart Scaler / Repo Manager" Vendor="Giacomo Marciani" Version="1.0.0"
-
+# Update OS
 RUN apt-get update -y
+RUN apt-get upgrade -y
 
-RUN apt-get install -y python-pip python-dev
+# Install Python
+RUN apt-get install -y build-essential python3 python3-dev python3-pip
+RUN pip3 install --upgrade pip
 
+# Copy files
 ADD . /app
 
+# Change working directory
 WORKDIR /app
 
-COPY ./requirements.txt ./requirements.txt
+# Install Python dependencies
+RUN pip3 install -r requirements.txt
 
-RUN pip install -r requirements.txt
+# Make port 18003 available to the world outside this container
+EXPOSE 18003
 
-EXPOSE 18002
-
-ENTRYPOINT [ "python" ]
-
-CMD [ "app.py" ]
+# Run app.py when the container launches
+CMD ["python3", "app.py"]
