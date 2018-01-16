@@ -1,3 +1,8 @@
+"""
+Default configuration for service RepoManager
+"""
+
+
 class Default:
     DEBUG = True
 

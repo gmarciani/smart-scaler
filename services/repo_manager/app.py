@@ -12,4 +12,4 @@ app.register_blueprint(core)
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=app.config["REPO_MANAGER_PORT"])
+    app.run(host="0.0.0.0", port=app.config["REPO_MANAGER_PORT"], threaded=True)

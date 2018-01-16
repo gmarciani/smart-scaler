@@ -1,3 +1,8 @@
+"""
+Default configuration for service KubernetesSimulator
+"""
+
+
 class Default:
     DEBUG = True
 

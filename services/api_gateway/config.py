@@ -1,3 +1,8 @@
+"""
+Default configuration for service ApiGateway
+"""
+
+
 class Default:
     DEBUG = True
 

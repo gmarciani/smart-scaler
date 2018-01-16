@@ -1,3 +1,8 @@
+"""
+Default configuration for service AgentsManager
+"""
+
+
 class Default:
     DEBUG = True
 
@@ -15,3 +20,4 @@ class Default:
 
     KUBERNETES_HOST = "localhost"
     KUBERNETES_PORT = 18008
+    KUBERNETES_PULL = 10  # seconds

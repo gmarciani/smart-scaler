@@ -1,5 +1,6 @@
 import json
 
+
 class Pod:
     """
     A Kubernetes Pod.
@@ -13,13 +14,14 @@ class Pod:
         """
         self.name = name
         self.replicas = replicas
+        self.cpu_utilization = 0.0
 
     def __str__(self):
         """
         Return the string representation.
         :return: (string) the string representation.
         """
-        return "Pod({},{})".format(self.name, self.replicas)
+        return "Pod({},{})".format(self.name, self.replicas, self.cpu_utilization)
 
     def __repr__(self):
         """
