@@ -1,10 +1,15 @@
 """
-Default configuration for service ApiGateway
+Configurations for service ApiGateway
 """
 
 
 class Default:
+    """
+    Default configuration.
+    """
     DEBUG = True
+
+    LOG_LEVEL = "INFO"
 
     API_GATEWAY_HOST = "localhost"
     API_GATEWAY_PORT = 18001
@@ -15,5 +20,25 @@ class Default:
     REPO_MANAGER_HOST = "localhost"
     REPO_MANAGER_PORT = 18003
 
+    KUBERNETES_HOST = "localhost"
+    KUBERNETES_PORT = 18008
+    KUBERNETES_PULL = 10  # seconds
+
     REDIS_HOST = "localhost"
-    REDIS_PORT = 6379
+    REDIS_PORT = 18009
+
+
+class Debug(Default):
+    """
+    Debug configuration.
+    """
+    DEBUG = True
+
+    LOG_LEVEL = "DEBUG"
+
+
+class Production(Default):
+    """
+    Production configuration.
+    """
+    DEBUG = False

@@ -1,17 +1,20 @@
 from flask import Flask
-from api.status import status
-from api.kube import kube
-from _ignore.test import test
+from api_api_gateway.status import status
+from api_api_gateway.kubernetes import kubernetes
+import logging
 
 
 # Initialization
 app = Flask(__name__)
 app.config.from_object("config.Default")
 
+# Configure logger
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging._nameToLevel[app.config["LOG_LEVEL"]])
+
 # Routes
 app.register_blueprint(status)
-app.register_blueprint(kube)
-app.register_blueprint(test)
+app.register_blueprint(kubernetes)
 
 
 if __name__ == "__main__":

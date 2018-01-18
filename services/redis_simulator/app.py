@@ -1,7 +1,6 @@
 from flask import Flask
-from api_kubernetes_simulator.status import status
-from api_kubernetes_simulator.pods import pods
-from api_kubernetes_simulator.smart_scalers import smart_scalers
+from api_redis_simulator.status import status
+from api_redis_simulator.database import database
 import logging
 
 
@@ -15,9 +14,8 @@ logging.basicConfig(level=logging._nameToLevel[app.config["LOG_LEVEL"]])
 
 # Routes
 app.register_blueprint(status)
-app.register_blueprint(pods)
-app.register_blueprint(smart_scalers)
+app.register_blueprint(database)
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=app.config["KUBERNETES_PORT"], threaded=True)
+    app.run(host="0.0.0.0", port=app.config["REDIS_PORT"], threaded=True)
