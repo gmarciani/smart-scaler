@@ -42,55 +42,28 @@ class RLAgent:
         :return: (void)
         """
         learning_parameters = {
+            "pod_name": self.pod_name,
             "min_replicas": self.min_replicas,
             "max_replicas": self.max_replicas,
             "alpha": 0.5,
             "gamma": 0.5
         }
 
-        try:
-            repo_manager_ctrl.create_learning_context(self.repo_manager_conn, self.name, learning_parameters)
-        except ConnectionError as exc:
-            logger.warning("Cannot connect to Repository Manager: {}".format(str(exc)))
-            return False
-        except JSONDecodeError as exc:
-            logger.warning("Malformed response from Repository Manager: {}".format(str(exc)))
-            return False
-        except RepositoryManagerException as exc:
-            if exc.code is 404:
-                logger.warning("Error from Repository Manager: {}".format(exc.message))
-                return True
-            else:
-                logger.warning("Error from Repository Manager: {}".format(exc.message))
-
-
-        return True
+        repo_manager_ctrl.create_learning_context(self.repo_manager_conn, self.name, learning_parameters)
 
     def remove_learning_context(self):
         """
         Remove the learning context within the repository.
         :return: (void)
         """
-        try:
-            repo_manager_ctrl.remove_learning_context(self.repo_manager_conn, self.name)
-        except ConnectionError as exc:
-            logger.warning("Cannot connect to Repository Manager: {}".format(str(exc)))
-            return False
-        except JSONDecodeError as exc:
-            logger.warning("Malformed response from Repository Manager: {}".format(str(exc)))
-            return False
-        except RepositoryManagerException as exc:
-            logger.warning("Error from Repository Manager: {}".format(exc.message))
-            return False
-
-        return True
+        repo_manager_ctrl.remove_learning_context(self.repo_manager_conn, self.name)
 
     def has_context(self):
         """
         Check whether the agent has an already initialized learning context.
         :return: True, if agent has an already initialized learning context; False, otherwise.
         """
-        return repo_manager_ctrl.has_learning_context(self.repo_manager_conn, self.name)
+        return repo_manager_ctrl.exists_learning_context(self.repo_manager_conn, self.name)
 
     def apply_scaling_action(self):
         """
@@ -100,7 +73,7 @@ class RLAgent:
         pod_name = self.pod_name
         try:
             pod_status = kubernetes_ctrl.get_pod_status(self.kubernetes_conn, self.pod_name)
-            learning_context = repo_manager_ctrl.get_learning_context(self.repo_manager_conn, self.pod_name)
+            learning_context = repo_manager_ctrl.get_learning_context(self.repo_manager_conn, self.name)
             reward = self._compute_reward(pod_status)
             suggested_replicas = self._compute_replicas(pod_status, reward, learning_context)
 
@@ -156,7 +129,7 @@ class RLAgent:
         Return the string representation.
         :return: (string) the string representation.
         """
-        return "Agent({},{} @ {},{})".format(self.name, self.pod_name, self.min_replicas, self.max_replicas, self.kubernetes_conn, self.repo_manager_conn)
+        return "Agent({},{},{},{},{},{})".format(self.name, self.pod_name, self.min_replicas, self.max_replicas, self.kubernetes_conn, self.repo_manager_conn)
 
     def __repr__(self):
         """

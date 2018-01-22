@@ -20,9 +20,24 @@ def main_loop(kubernetes_conn, repo_manager_conn, agents):
     :param agents: (dict) the repository of agents ({smart_scaler_name: agent}).
     :return: (void)
     """
-    _update_agents(kubernetes_conn, repo_manager_conn, agents)
-    logger.info("Agents: {}".format(agents))
-    _apply_scaling_actions(agents)
+    logger.info("-" * 25)
+    try:
+        logger.debug("Agents (before update): {}".format(agents))
+        _update_agents(kubernetes_conn, repo_manager_conn, agents)
+        logger.info("Agents (after update): {}".format(agents))
+        _apply_scaling_actions(agents)
+    except ConnectionError as exc:
+        logger.warning("Cannot connect: {}".format(str(exc)))
+        return
+    except JSONDecodeError as exc:
+        logger.warning("Malformed response: {}".format(str(exc)))
+        return
+    except KubernetesException as exc:
+        logger.warning("Error from Kubernetes: {}".format(exc.message))
+        return
+    except RepositoryManagerException as exc:
+        logger.warning("Error from Repository Manager: {}".format(exc.message))
+        return
 
 
 def _update_agents(kubernetes_conn, repo_manager_conn, agents):
@@ -39,6 +54,7 @@ def _update_agents(kubernetes_conn, repo_manager_conn, agents):
 
     smart_scalers_to_add = list(filter(lambda x: x["name"] not in agents, smart_scalers_all))
 
+    logger.debug("Smart Scaler(s) ALL: {}".format(smart_scalers_all))
     logger.debug("Smart Scaler(s) to remove: {}".format(smart_scalers_to_remove))
     logger.debug("Smart Scaler(s) to add: {}".format(smart_scalers_to_add))
 
@@ -67,20 +83,9 @@ def _get_all_smart_scalers(kubernetes_conn, repo_manager_conn, manager_id):
     :param manager_id (string): the agents manager id.
     :return: (list) the list of Smart Scalers for the specified agents manager.
     """
-    try:
-        smart_scalers_all = kubernetes_ctrl.get_all_smart_scalers(kubernetes_conn)
-        # TODO smart_scalers
-        # smart_scalers = repo_manager_ctrl.get_all_smart_scalers(repo_manager_conn, manager_id)
-    except ConnectionError as exc:
-        logger.warning("Cannot connect to Kubernetes: {}".format(str(exc)))
-        return
-    except JSONDecodeError as exc:
-        logger.warning("Malformed response from Kubernetes: {}".format(str(exc)))
-        return
-    except KubernetesException as exc:
-        logger.warning("Error from Kubernetes: {}".format(exc.message))
-        return
-
+    smart_scalers_all = kubernetes_ctrl.get_all_smart_scalers(kubernetes_conn)
+    # TODO smart_scalers
+    # smart_scalers = repo_manager_ctrl.get_all_smart_scalers(repo_manager_conn, manager_id)
     return smart_scalers_all
 
 
@@ -95,28 +100,26 @@ def _delete_smart_scaler(smart_scaler_name, agents):
     removed = False
     attempts = 0
     max_attempts = 3
-    try:
-        while not removed and attempts < max_attempts:
-            attempts += 1
-            logger.debug(
-                "Removing context for Agent {}: attempt {}/{}".format(agent.name, attempts, max_attempts))
-            removed = agent.remove_learning_context()
-    except ConnectionError as exc:
-        logger.warning("Cannot connect to Repository Manager: {}".format(str(exc)))
-        return
-    except JSONDecodeError as exc:
-        logger.warning("Malformed response from Repository Manager: {}".format(str(exc)))
-        return
-    except KubernetesException as exc:
-        logger.warning("Error from Repository Manager: {}".format(exc.message))
-        return
+    while not removed and attempts < max_attempts:
+        attempts += 1
+        logger.debug(
+            "Removing context for Agent {}: attempt {}/{}".format(agent.name, attempts, max_attempts))
+        try:
+            agent.remove_learning_context()
+            logger.debug("Successfully removed context for Agent {}".format(agent.name))
+            removed = True
+        except ConnectionError as exc:
+            logger.warning("Cannot connect to Repository Manager: {}".format(str(exc)))
+        except JSONDecodeError as exc:
+            logger.warning("Malformed response from Repository Manager: {}".format(str(exc)))
+        except RepositoryManagerException as exc:
+            if exc.code == 404:
+                removed = True
+            logger.warning("Error from Repository Manager: {}".format(exc.message))
 
     if removed:
         del agents[agent.name]
         logger.debug("Removed Smart Scaler {}".format(agent.name))
-    else:
-        logger.warning(
-            "Smart Scaler {} not removed due to an error during learning context initialization".format(agent.name))
 
 
 def _add_smart_scaler(smart_scaler, kubernetes_conn, repo_manager_conn, agents):
@@ -138,6 +141,12 @@ def _add_smart_scaler(smart_scaler, kubernetes_conn, repo_manager_conn, agents):
     )
 
     initialized = agent_new.has_context()
+
+    if initialized:
+        logger.debug("Agent {} already have an initialized learning context".format(agent_new.name))
+    else:
+        logger.debug("Agent {} does not have any learning context".format(agent_new.name))
+
     attempts = 0
     max_attempts = 3
     while not initialized and attempts < max_attempts:
@@ -145,15 +154,15 @@ def _add_smart_scaler(smart_scaler, kubernetes_conn, repo_manager_conn, agents):
         logger.debug(
             "Initializing context for Agent {}: attempt {}/{}".format(agent_new.name, attempts, max_attempts))
         try:
-            initialized = agent_new.create_learning_context()
+            agent_new.create_learning_context()
+            logger.debug("Successfully initialized context for Agent {}".format(agent_new.name))
+            initialized = True
         except ConnectionError as exc:
             logger.warning("Cannot connect to Repository Manager: {}".format(str(exc)))
         except JSONDecodeError as exc:
             logger.warning("Malformed response from Repository Manager: {}".format(str(exc)))
         except RepositoryManagerException as exc:
             logger.warning("Error from Repository Manager: {}".format(exc.message))
-            if exc.code is 404:
-                return
 
     if initialized:
         agents[agent_new.name] = agent_new

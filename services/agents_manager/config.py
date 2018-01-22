@@ -22,7 +22,7 @@ class Default:
 
     KUBERNETES_HOST = "localhost"
     KUBERNETES_PORT = 18008
-    KUBERNETES_PULL = 10  # seconds
+    KUBERNETES_PULL = 20  # seconds
 
     REDIS_HOST = "localhost"
     REDIS_PORT = 18009

@@ -74,11 +74,11 @@ def get_learning_context(repo_manager_conn, context_id):
     return response_json["context"]
 
 
-def has_learning_context(repo_manager_conn, context_id):
+def exists_learning_context(repo_manager_conn, context_id):
     host = repo_manager_conn[0]
     port = repo_manager_conn[1]
 
-    url = "http://{}:{}/learning_contexts".format(host, port)
+    url = "http://{}:{}/learning_contexts/exists".format(host, port)
 
     data = {
         "context_id": context_id
@@ -86,12 +86,12 @@ def has_learning_context(repo_manager_conn, context_id):
 
     response = requests.get(url, params=data)
 
-    if response.status_code is not 200:
+    if response.status_code == 200:
+        return True
+    elif response.status_code == 404:
+        return False
+    else:
         raise RepositoryManagerException(response.status_code, response.json()["error"])
-
-    response_json = response.json()
-
-    return response_json["context"]
 
 
 def get_all_smart_scalers(repo_manager_conn, manager_id):
