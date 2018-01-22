@@ -3,7 +3,7 @@ import json
 from exceptions.kubernetes_exception import KubernetesException
 
 
-def get_all_kube_smart_scalers(kubernetes_conn):
+def get_all_smart_scalers(kubernetes_conn):
     """
     Get the list of Smart Scalers.
     :param kubernetes_conn: (tuple:(string,int)) the Kubernetes connection (host,port).

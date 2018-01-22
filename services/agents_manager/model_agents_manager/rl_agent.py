@@ -36,16 +36,75 @@ class RLAgent:
 
         self.last_pod_status = None
 
+    def create_learning_context(self):
+        """
+        Create the learning context within the repository.
+        :return: (void)
+        """
+        learning_parameters = {
+            "min_replicas": self.min_replicas,
+            "max_replicas": self.max_replicas,
+            "alpha": 0.5,
+            "gamma": 0.5
+        }
+
+        try:
+            repo_manager_ctrl.create_learning_context(self.repo_manager_conn, self.name, learning_parameters)
+        except ConnectionError as exc:
+            logger.warning("Cannot connect to Repository Manager: {}".format(str(exc)))
+            return False
+        except JSONDecodeError as exc:
+            logger.warning("Malformed response from Repository Manager: {}".format(str(exc)))
+            return False
+        except RepositoryManagerException as exc:
+            if exc.code is 404:
+                logger.warning("Error from Repository Manager: {}".format(exc.message))
+                return True
+            else:
+                logger.warning("Error from Repository Manager: {}".format(exc.message))
+
+
+        return True
+
+    def remove_learning_context(self):
+        """
+        Remove the learning context within the repository.
+        :return: (void)
+        """
+        try:
+            repo_manager_ctrl.remove_learning_context(self.repo_manager_conn, self.name)
+        except ConnectionError as exc:
+            logger.warning("Cannot connect to Repository Manager: {}".format(str(exc)))
+            return False
+        except JSONDecodeError as exc:
+            logger.warning("Malformed response from Repository Manager: {}".format(str(exc)))
+            return False
+        except RepositoryManagerException as exc:
+            logger.warning("Error from Repository Manager: {}".format(exc.message))
+            return False
+
+        return True
+
+    def has_context(self):
+        """
+        Check whether the agent has an already initialized learning context.
+        :return: True, if agent has an already initialized learning context; False, otherwise.
+        """
+        return repo_manager_ctrl.has_learning_context(self.repo_manager_conn, self.name)
+
     def apply_scaling_action(self):
+        """
+        Apply the scaling action, connecting to Kubernetes and Repo Manager.
+        :return: (void)
+        """
         pod_name = self.pod_name
         try:
-            pod_status = kubernetes_ctrl.get_pod_status(self.kubernetes_conn, pod_name)
-            learning_params = repo_manager_ctrl.get_learning_params(self.repo_manager_conn, pod_name)
+            pod_status = kubernetes_ctrl.get_pod_status(self.kubernetes_conn, self.pod_name)
+            learning_context = repo_manager_ctrl.get_learning_context(self.repo_manager_conn, self.pod_name)
             reward = self._compute_reward(pod_status)
+            suggested_replicas = self._compute_replicas(pod_status, reward, learning_context)
 
             current_replicas = pod_status["replicas"]
-            suggested_replicas = self._compute_replicas(pod_status, reward, learning_params)
-
             if current_replicas != suggested_replicas:
                 replicas_old, replicas_new = kubernetes_ctrl.set_pod_replicas(self.kubernetes_conn, pod_name, suggested_replicas)
                 logger.info("Pod {} scaled from {} to {}".format(pod_name, replicas_old, replicas_new))
@@ -53,7 +112,6 @@ class RLAgent:
                 logger.info("Pod {} not scaled ({} replicas)".format(pod_name, current_replicas))
 
             self.last_pod_status = pod_status
-
         except ConnectionError as exc:
             logger.warning("Cannot connect to Kubernetes: {}".format(str(exc)))
         except JSONDecodeError as exc:
@@ -69,18 +127,20 @@ class RLAgent:
         :return: (float) the reward.
         """
         cpu_utilization_curr = pod_status["cpu_utilization"]
-        cpu_utilization_prev = self.last_pod_status["cpu_utilization"]
-        return (cpu_utilization_curr - cpu_utilization_prev) / cpu_utilization_prev
+        cpu_utilization_prev = self.last_pod_status["cpu_utilization"] if self.last_pod_status is not None else 0.0
+        return (cpu_utilization_curr - cpu_utilization_prev)
 
-    def _compute_replicas(self, pod_status, reward, learning_params):
+    def _compute_replicas(self, pod_status, reward, learning_context):
         """
         Compute the replication degree.
         :param pod_status: (PodState) the current Pod state.
         :param reward: (float) the current reward.
-        :param learning_params: (LearningParams) the current learning parameters.
+        :param learning_context: (LearningParams) the current learning context.
         :return: the suggested replication degree.
         """
         cpu_utilization = pod_status["cpu_utilization"]
+
+        q_matrix = learning_context["matrix"]
 
         if 0.0 <= cpu_utilization <= 0.40:
             suggested_replicas = self.min_replicas

@@ -1,6 +1,7 @@
 from flask import Flask
 from api_repo_manager.status import status
 from api_repo_manager.repo import repo
+from api_repo_manager.learning_contexts import learning_contexts
 import logging
 
 
@@ -15,6 +16,7 @@ logging.basicConfig(level=logging._nameToLevel[app.config["LOG_LEVEL"]])
 # Routes
 app.register_blueprint(status)
 app.register_blueprint(repo)
+app.register_blueprint(learning_contexts)
 
 
 if __name__ == "__main__":
