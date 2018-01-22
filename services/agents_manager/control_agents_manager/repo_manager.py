@@ -7,7 +7,7 @@ def create_learning_context(repo_manager_conn, context_id, context_params):
     Initialize the learning context for the specified context.
     :param repo_manager_conn: (tuple:(string,int)) the Kubernetes connection (host,port).
     :param context_id: (string) the context id.
-    :param context_params: (dict) the learning parameters.
+    :param context_params: (dict) the context parameters.
     :return: (void).
     """
     host = repo_manager_conn[0]
@@ -91,6 +91,23 @@ def exists_learning_context(repo_manager_conn, context_id):
     elif response.status_code == 404:
         return False
     else:
+        raise RepositoryManagerException(response.status_code, response.json()["error"])
+
+
+def update_learning_context(repo_manager_conn, context_id, context):
+    host = repo_manager_conn[0]
+    port = repo_manager_conn[1]
+
+    url = "http://{}:{}/learning_contexts".format(host, port)
+
+    data = {
+        "context_id": context_id,
+        "context": context
+    }
+
+    response = requests.patch(url, params=data)
+
+    if response.status_code is not 200:
         raise RepositoryManagerException(response.status_code, response.json()["error"])
 
 

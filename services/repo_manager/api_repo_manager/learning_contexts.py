@@ -22,7 +22,7 @@ def create_learning_context():
     except KeyError:
         response = {
             "ts": datetime.now(),
-            "error": "Cannot find field(s) 'context', 'params'"
+            "error": "Cannot find field(s) 'context_id', 'context_params'"
         }
         return jsonify(response), 400
 
@@ -61,7 +61,7 @@ def delete_learning_context():
     except KeyError:
         response = {
             "ts": datetime.now(),
-            "error": "Cannot find field(s) 'context'"
+            "error": "Cannot find field(s) 'context_id'"
         }
         return jsonify(response), 400
 
@@ -100,7 +100,7 @@ def get_learning_context():
     except KeyError:
         response = {
             "ts": datetime.now(),
-            "error": "Cannot find field(s) 'context'"
+            "error": "Cannot find field(s) 'context_id'"
         }
         return jsonify(response), 400
 
@@ -139,7 +139,7 @@ def exists_learning_context():
     except KeyError:
         response = {
             "ts": datetime.now(),
-            "error": "Cannot find field(s) 'context'"
+            "error": "Cannot find field(s) 'context_id'"
         }
         return jsonify(response), 400
 
@@ -164,3 +164,43 @@ def exists_learning_context():
         "context_id": context_id
     }
     return jsonify(response), 200 if context_exists else 404
+
+
+@learning_contexts.route("/learning_contexts", methods=["PATCH"])
+def update_learning_context():
+    """
+    Update an existing learning context.
+    :return: (json) the response.
+    """
+    data = request.get_json()
+
+    try:
+        context_id = data["context_id"]
+        context = data["context"]
+    except KeyError:
+        response = {
+            "ts": datetime.now(),
+            "error": "Cannot find field(s) 'context_id', 'context'"
+        }
+        return jsonify(response), 400
+
+    try:
+        context = context_ctrl.update_learning_context(current_app.config["REDIS_HOST"], current_app.config["REDIS_PORT"], context_id, context)
+    except ConnectionError as exc:
+        response = {
+            "ts": datetime.now(),
+            "error": "Cannot connect to repository: {}".format(str(exc))
+        }
+        return jsonify(response), 500
+    except RepositoryException as exc:
+        response = {
+            "ts": datetime.now(),
+            "error": "Error from repository: {}".format(exc.message)
+        }
+        return jsonify(response), exc.code
+
+    response = {
+        "ts": datetime.now(),
+        "context": context
+    }
+    return jsonify(response)

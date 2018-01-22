@@ -1,7 +1,7 @@
 from control_agents_manager import kubernetes_simulation as kubernetes_ctrl
 from control_agents_manager import repo_manager as repo_manager_ctrl
+from control_agents_manager import qlearning as qlearning_ctrl
 from exceptions.kubernetes_exception import KubernetesException
-from exceptions.repo_manager_exception import RepositoryManagerException
 from json.decoder import JSONDecodeError
 from requests.exceptions import ConnectionError
 import logging
@@ -16,7 +16,7 @@ class RLAgent:
     A Reinforcement Learning agent.
     """
 
-    def __init__(self, kubernetes_conn, repo_manager_conn, name, pod_name, min_replicas=0, max_replicas=1):
+    def __init__(self, kubernetes_conn, repo_manager_conn, name, pod_name, min_replicas=0, max_replicas=1, state_granularity=10):
         """
         Create a new Reinforcement Learning agent.
         :param kubernetes_conn: (tuple:(string,int)) the Kubernetes connection (host,port).
@@ -25,6 +25,7 @@ class RLAgent:
         :param pod_name: (string) the Pod name.
         :param min_replicas: (integer) the minimum replication degree (default is 0).
         :param max_replicas: (integer) the maximum replication degree (default is 1).
+        :param state_granularity: (integer) the granularity level (default is 10).
         """
         self.kubernetes_conn = kubernetes_conn
         self.repo_manager_conn = repo_manager_conn
@@ -33,23 +34,24 @@ class RLAgent:
         self.pod_name = pod_name
         self.min_replicas = min_replicas
         self.max_replicas = max_replicas
+        self.state_granularity = state_granularity
 
-        self.last_pod_status = None
+        self.last_state = None
+        self.last_action = None
 
     def create_learning_context(self):
         """
         Create the learning context within the repository.
         :return: (void)
         """
-        learning_parameters = {
+        context_parameters = {
             "pod_name": self.pod_name,
-            "min_replicas": self.min_replicas,
-            "max_replicas": self.max_replicas,
             "alpha": 0.5,
-            "gamma": 0.5
+            "gamma": 0.5,
+            "state_granularity": 10
         }
 
-        repo_manager_ctrl.create_learning_context(self.repo_manager_conn, self.name, learning_parameters)
+        repo_manager_ctrl.create_learning_context(self.repo_manager_conn, self.name, context_parameters)
 
     def remove_learning_context(self):
         """
@@ -58,7 +60,7 @@ class RLAgent:
         """
         repo_manager_ctrl.remove_learning_context(self.repo_manager_conn, self.name)
 
-    def has_context(self):
+    def has_learning_context(self):
         """
         Check whether the agent has an already initialized learning context.
         :return: True, if agent has an already initialized learning context; False, otherwise.
@@ -72,19 +74,40 @@ class RLAgent:
         """
         pod_name = self.pod_name
         try:
-            pod_status = kubernetes_ctrl.get_pod_status(self.kubernetes_conn, self.pod_name)
+            # Retrieve the learning context
             learning_context = repo_manager_ctrl.get_learning_context(self.repo_manager_conn, self.name)
-            reward = self._compute_reward(pod_status)
-            suggested_replicas = self._compute_replicas(pod_status, reward, learning_context)
 
-            current_replicas = pod_status["replicas"]
+            # Compute reward
+            pod_state = kubernetes_ctrl.get_pod_status(self.kubernetes_conn, self.pod_name)
+            reward = qlearning_ctrl.compute_reward(pod_state, self.last_state)
+
+            # Update matrix
+            matrix = learning_context["matrix"]
+            normalized_state = qlearning_ctrl.compute_normalized_state(pod_state)
+            matrix_state = min(self.state_granularity -1, int(normalized_state * self.state_granularity))
+            matrix[matrix_state][self.last_action.value] = reward
+
+            # Compute action
+            action = qlearning_ctrl.compute_action(pod_state, matrix)
+
+            # Execute action
+            current_replicas = pod_state["replicas"]
+            scale_amount = 1 if action is qlearning_ctrl.Action.SCALE_OUT else (-1 if action is qlearning_ctrl.Action.SCALE_IN else 0)
+            suggested_replicas = current_replicas + scale_amount
             if current_replicas != suggested_replicas:
                 replicas_old, replicas_new = kubernetes_ctrl.set_pod_replicas(self.kubernetes_conn, pod_name, suggested_replicas)
                 logger.info("Pod {} scaled from {} to {}".format(pod_name, replicas_old, replicas_new))
             else:
                 logger.info("Pod {} not scaled ({} replicas)".format(pod_name, current_replicas))
 
-            self.last_pod_status = pod_status
+            # Update agent state
+            self.last_state = pod_state
+            self.last_action = action
+
+            # Backup matrix on repository
+            learning_context["matrix"] = matrix
+            repo_manager_ctrl.update_learning_context(self.repo_manager_conn, self.name, learning_context)
+
         except ConnectionError as exc:
             logger.warning("Cannot connect to Kubernetes: {}".format(str(exc)))
         except JSONDecodeError as exc:
@@ -92,37 +115,6 @@ class RLAgent:
             return
         except KubernetesException as exc:
             logger.warning("Error from Kubernetes: {}".format(exc.message))
-
-    def _compute_reward(self, pod_status):
-        """
-        Compute the reward.
-        :param pod_status: the current Pod state.
-        :return: (float) the reward.
-        """
-        cpu_utilization_curr = pod_status["cpu_utilization"]
-        cpu_utilization_prev = self.last_pod_status["cpu_utilization"] if self.last_pod_status is not None else 0.0
-        return (cpu_utilization_curr - cpu_utilization_prev)
-
-    def _compute_replicas(self, pod_status, reward, learning_context):
-        """
-        Compute the replication degree.
-        :param pod_status: (PodState) the current Pod state.
-        :param reward: (float) the current reward.
-        :param learning_context: (LearningParams) the current learning context.
-        :return: the suggested replication degree.
-        """
-        cpu_utilization = pod_status["cpu_utilization"]
-
-        q_matrix = learning_context["matrix"]
-
-        if 0.0 <= cpu_utilization <= 0.40:
-            suggested_replicas = self.min_replicas
-        elif 0.40 < cpu_utilization <= 0.80:
-            suggested_replicas = self.min_replicas + self.max_replicas
-        else:
-            suggested_replicas = self.max_replicas
-
-        return suggested_replicas
 
     def __str__(self):
         """

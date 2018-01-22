@@ -140,7 +140,7 @@ def _add_smart_scaler(smart_scaler, kubernetes_conn, repo_manager_conn, agents):
         smart_scaler["max_replicas"] | 10
     )
 
-    initialized = agent_new.has_context()
+    initialized = agent_new.has_learning_context()
 
     if initialized:
         logger.debug("Agent {} already have an initialized learning context".format(agent_new.name))

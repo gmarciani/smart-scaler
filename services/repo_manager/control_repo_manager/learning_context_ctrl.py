@@ -14,10 +14,27 @@ def create_learning_context(host, port, context_id, context_params):
     context = {
         "context_id": context_id,
         "context_params": context_params,
-        "matrix": []
+        "matrix": [[0.0 for i in range(3)] for j in range(context_params["state_granularity"])]
     }
 
     return repo_ctrl.set_key(host, port, context_id, context, unique=True)
+
+
+def update_learning_context(host, port, context_id, context):
+    """
+    Create a new learning context.
+    :param host: (string) the repo hostname.
+    :param port: (integer) the repo port number.
+    :param context_id: (string) the context id.
+    :param context: (dict) the context parameters.
+    :return: the updated context.
+    """
+    context = {
+        "context_id": context_id,
+        "context": context
+    }
+
+    return repo_ctrl.set_key(host, port, context_id, context)
 
 
 def delete_learning_context(host, port, context_id):
