@@ -1,20 +1,25 @@
 from flask import Flask
-from api_redis_simulator.status import status
-from api_redis_simulator.database import database
+from services.redis_simulator.api.status import status
+from services.redis_simulator.api.database import database
+from services.common.logs import config as log_configurator
+from services.agents_manager.control.shutdown_hooks import simple_shutdown_hook
 import logging
+import atexit
 
 
 # Initialization
 app = Flask(__name__)
-app.config.from_object("config.Default")
+app.config.from_object("config.Debug")
 
-# Configure logger
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging._nameToLevel[app.config["LOG_LEVEL"]])
+# Configure logging
+log_configurator.configure_logging(logging, app.config["LOG_LEVEL"])
 
 # Routes
 app.register_blueprint(status)
 app.register_blueprint(database)
+
+# Shutdown Hooks
+atexit.register(simple_shutdown_hook, "My Shutdown Param")
 
 
 if __name__ == "__main__":

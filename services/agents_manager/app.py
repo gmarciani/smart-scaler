@@ -1,33 +1,32 @@
 from flask import Flask
-from api_agents_manager.status import status
-from control_agents_manager.scheduler import MainScheduler
-from control_agents_manager.jobs import shutdown_hook
-import atexit
+from services.common.logs import config as log_configurator
+from services.agents_manager.api.status import status
+from services.agents_manager.control.scheduler import MainScheduler
+from services.agents_manager.control.shutdown_hooks import simple_shutdown_hook
+from services.common.control import connections as conn_ctrl
 import logging
+import atexit
 
 
 # Initialization
 app = Flask(__name__)
 app.config.from_object("config.Debug")
 
-# Configure logger
-logging.basicConfig(level=logging._nameToLevel[app.config["LOG_LEVEL"]])
-logging.getLogger("apscheduler.scheduler").setLevel(logging.WARNING)
-logging.getLogger("apscheduler.executors.default").setLevel(logging.WARNING)
-logging.getLogger("urllib3").setLevel(logging.FATAL)
+# Configure logging
+log_configurator.configure_logging(logging, app.config["LOG_LEVEL"])
 
 # Routes
 app.register_blueprint(status)
 
 # Scheduled Jobs
 AGENTS = {}
-kubernetes_conn = (app.config["KUBERNETES_HOST"], app.config["KUBERNETES_PORT"])
-repo_manager_conn = (app.config["REPO_MANAGER_HOST"], app.config["REPO_MANAGER_PORT"])
+kubernetes_conn = conn_ctrl.get_service_connection("kubernetes", app.config)
+repo_manager_conn = conn_ctrl.get_service_connection("repo_manager", app.config)
 scheduler = MainScheduler(kubernetes_conn, repo_manager_conn, AGENTS, app.config["KUBERNETES_PULL"])
 scheduler.start()
 
 # Shutdown Hooks
-atexit.register(shutdown_hook, "My Shutdown Param")
+atexit.register(simple_shutdown_hook, "My Shutdown Param")
 atexit.register(lambda: scheduler.shutdown_hook())
 
 

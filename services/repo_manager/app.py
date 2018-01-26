@@ -1,22 +1,27 @@
 from flask import Flask
-from api_repo_manager.status import status
-from api_repo_manager.repo import repo
-from api_repo_manager.learning_contexts import learning_contexts
+from services.repo_manager.api.status import status
+from services.repo_manager.api.repo import repo
+from services.repo_manager.api.learning_contexts import learning_contexts
+from services.common.logs import config as log_configurator
+from services.agents_manager.control.shutdown_hooks import simple_shutdown_hook
 import logging
+import atexit
 
 
 # Initialization
 app = Flask(__name__)
-app.config.from_object("config.Default")
+app.config.from_object("config.Debug")
 
-# Configure logger
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging._nameToLevel[app.config["LOG_LEVEL"]])
+# Configure logging
+log_configurator.configure_logging(logging, app.config["LOG_LEVEL"])
 
 # Routes
 app.register_blueprint(status)
 app.register_blueprint(repo)
 app.register_blueprint(learning_contexts)
+
+# Shutdown Hooks
+atexit.register(simple_shutdown_hook, "My Shutdown Param")
 
 
 if __name__ == "__main__":
