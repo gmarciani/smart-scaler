@@ -1,5 +1,5 @@
 from flask import Flask
-from services.api_gateway.api.status import status
+from services.api_gateway.api.status import status as api_status
 from services.common.logs import config as log_configurator
 from services.agents_manager.control.shutdown_hooks import simple_shutdown_hook
 import logging
@@ -14,7 +14,7 @@ app.config.from_object("config.Debug")
 log_configurator.configure_logging(logging, app.config["LOG_LEVEL"])
 
 # Routes
-app.register_blueprint(status)
+app.register_blueprint(api_status)
 
 # Shutdown Hooks
 atexit.register(simple_shutdown_hook, "My Shutdown Param")

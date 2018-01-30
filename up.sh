@@ -1,6 +1,22 @@
 #!/bin/bash
 
+##
+# Launch the specified service
+#
+# @Usage: bash up.sh [serviceName] [mode]
+#         * *serviceName* can be
+#           * agents_manager
+#           * api_gateway
+#           * repo_manager
+#           * kubernetes_simulator
+#           * redis_simulator
+#         * *mode* can be
+#           * local
+#           * kubernetes
+##
+
 SERVICE=$1
+MODE="local"
 
 SERVICE_DIR="services/${SERVICE}"
 
