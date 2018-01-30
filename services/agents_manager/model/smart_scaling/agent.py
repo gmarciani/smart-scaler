@@ -1,9 +1,12 @@
+from agents_manager.model.learning.qlearning_agent import SimpleQLearningAgent as QLearningAgent
 from services.common.control import kubernetes as kubernetes_ctrl
 from services.common.control import repo_manager as repo_manager_ctrl
 from services.agents_manager.control import qlearning as qlearning_ctrl
 from services.common.exceptions.kubernetes_exception import KubernetesException
 from services.common.exceptions.repo_manager_exception import RepositoryManagerException
-from services.agents_manager.model.qlearning import Action as QLearningAction
+from agents_manager.model.smart_scaling.states import generate_state_space_normalized
+from agents_manager.model.smart_scaling.actions import generate_action_space
+from agents_manager.model.smart_scaling.actions import SimpleScalingAction as ScalingAction
 import logging
 
 
@@ -11,33 +14,41 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class RLAgent:
+DEFAULT_STATE_SPACE_GRANULARITY = 10
+
+DEFAULT_STATES = generate_state_space_normalized(DEFAULT_STATE_SPACE_GRANULARITY)
+DEFAULT_ACTIONS = generate_action_space(ScalingAction)
+
+
+class SmartScalingAgentQLearning(QLearningAgent):
     """
-    A Reinforcement Learning agent.
+    A Smart Scaling Agent, leveraging Q-Learning.
     """
 
-    def __init__(self, kubernetes_conn, repo_manager_conn, name, pod_name, min_replicas=0, max_replicas=1, state_granularity=10):
+    def __init__(self, kubernetes_conn, repo_manager_conn, name, pod_name, min_replicas, max_replicas):
         """
         Create a new Reinforcement Learning agent.
         :param kubernetes_conn: (SimpleConnection) the Kubernetes connection.
         :param repo_manager_conn: (SimpleConnection) the Kubernetes connection.
         :param name: (string) the Smart Scaler name.
         :param pod_name: (string) the Pod name.
-        :param min_replicas: (integer) the minimum replication degree (default is 0).
-        :param max_replicas: (integer) the maximum replication degree (default is 1).
-        :param state_granularity: (integer) the granularity level (default is 10).
+        :param min_replicas: (integer) the minimum replication degree.
+        :param max_replicas: (integer) the maximum replication degree.
+        :param state_granularity: (integer) the granularity level.
         """
+        QLearningAgent.__init__(self, DEFAULT_STATES, DEFAULT_ACTIONS)
+
         self.kubernetes_conn = kubernetes_conn
         self.repo_manager_conn = repo_manager_conn
 
         self.name = name
         self.pod_name = pod_name
+
         self.min_replicas = min_replicas
         self.max_replicas = max_replicas
-        self.state_granularity = state_granularity
 
         self.last_state = None
-        self.last_action = QLearningAction.NO_SCALE
+        self.last_action = None
 
     def create_learning_context(self):
         """

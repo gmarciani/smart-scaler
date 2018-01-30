@@ -1,4 +1,4 @@
-from services.agents_manager.model.qlearning import Action as QLearningAction
+from agents_manager.model.smart_scaling.agent import SimpleScalingAction as QLearningAction
 import logging
 
 

@@ -13,7 +13,10 @@ DEFAULT_GAMMA = 0.9
 DEFAULT_EPSILON = 0.1
 
 
-class QLearningAgent:
+class SimpleQLearningAgent:
+    """
+    A Q-Learning Agent.
+    """
 
     def __init__(self, states, actions, alpha=DEFAULT_ALPHA, gamma=DEFAULT_GAMMA, epsilon=DEFAULT_EPSILON):
         """
@@ -82,25 +85,25 @@ class QLearningAgent:
 
         # if exploration...
         if should_explore:
-            action = random.choice(self.actions)
-            logger.debug("exploration for state={} :: {}".format(state, action))
+            next_action = random.choice(self.actions)
+            logger.debug("exploration for state={} :: {}".format(state, next_action))
 
         # if exploitation...
         else:
             q_values = [self.get_q_value(state, a) for a in self.actions]  # Q values for current state
             max_q_value = max(q_values)  # maximum Q value for the current state
             if q_values.count(max_q_value) > 1:  # there is more than one suggested action
-                best = [i for i in range(self.n_actions) if q_values[i] == max_q_value]
-                action_idx = random.choice(best)
-                action = self.actions[action_idx]
+                best_actions_idx = [i for i in range(self.n_actions) if q_values[i] == max_q_value]
+                next_action_idx = random.choice(best_actions_idx)
+                next_action = self.actions[next_action_idx]
 
             else:  # there is one suggested action, only
-                action_idx = q_values.index(max_q_value)
-                action = self.actions[action_idx]
+                next_action_idx = q_values.index(max_q_value)
+                next_action = self.actions[next_action_idx]
 
-            logger.debug("exploitation for state={} :: {}".format(state, action))
+            logger.debug("exploitation for state={} :: {}".format(state, next_action))
 
-        return action
+        return next_action
 
     def pretty(self):
         """
@@ -132,13 +135,12 @@ class QLearningAgent:
 
 
 if __name__ == "__main__":
-
     states = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
     actions = [-1, 0, 1]
     alpha = 0.5
     gamma = 0.5
     epsilon = 0.1
-    agent = QLearningAgent(states, actions, alpha, gamma, epsilon)
+    agent = SimpleQLearningAgent(states, actions, alpha, gamma, epsilon)
 
     def compute_reward(curr_state):
         if curr_state > 0.5:
@@ -148,15 +150,20 @@ if __name__ == "__main__":
         elif curr_state > 0.9:
             reward = -1000000
         else:
-            reward = -1
+            reward = 1000
         return reward
 
     print(agent)
     print(agent.pretty())
 
+    cnt = {}
+    for state in states:
+        for action in actions:
+            cnt[(state,action)] = 0
+
     last_state = None
     last_action = None
-    iterations = 100
+    iterations = 1000
     for i in range(iterations):
         print("Iteration {}/{}".format(i, iterations))
 
@@ -173,9 +180,15 @@ if __name__ == "__main__":
 
         print("State={} | Reward={} | Action={}".format(curr_state, reward, action))
 
+        cnt[(curr_state,action)] += 1
+
         last_state = curr_state
         last_action = action
 
         print(agent.pretty())
 
         print("-" * 15)
+
+    for state in states:
+        for action in actions:
+            print("{} => {} : {}".format(state, action, cnt[(state, action)]))

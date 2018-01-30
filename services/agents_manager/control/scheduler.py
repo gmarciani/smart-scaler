@@ -1,6 +1,6 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-from services.agents_manager.control.jobs import main_loop
+from services.agents_manager.control.scheduler_jobs import main_loop
 
 
 class MainScheduler(BackgroundScheduler):
