@@ -1,5 +1,5 @@
 from common.control import kubernetes as kubernetes_ctrl
-from agents_manager.model.smart_scaling.agent import SmartScalingAgentQLearning
+from agents_manager.model.smart_scaling.agent import SmartScaler
 from services.common.exceptions.kubernetes_exception import KubernetesException
 from services.common.exceptions.repo_manager_exception import RepositoryManagerException
 import logging
@@ -32,7 +32,7 @@ def add_smart_scaler(smart_scaler, kubernetes_conn, repo_manager_conn, agents):
     :param agents: (dict) the repository of agents ({smart_scaler_name: agent}).
     :return: (void)
     """
-    agent_new = SmartScalingAgentQLearning(
+    agent_new = SmartScaler(
         kubernetes_conn,
         repo_manager_conn,
         smart_scaler["name"],

@@ -1,16 +1,6 @@
 from enum import Enum, unique
 from functools import total_ordering
 
-
-def generate_action_space(actions):
-    """
-    Get the action space, expressed as list of actions, for the given enumeration.
-    :param actions: (Enum) actions.
-    :return: (list(Enum)) the action space, expressed as list of actions.
-    """
-    return [action for action in actions]
-
-
 @unique
 @total_ordering
 class SimpleScalingAction(Enum):
@@ -25,14 +15,27 @@ class SimpleScalingAction(Enum):
     SCALE_OUT = 1
 
     def __lt__(self, other):
-        if self.__class__ is not other.__class__:
-            raise TypeError
+        """
+        Less-than operator.
+        :param other: the other object to compare.
+        :return: True, if self is less than other; False, otherwise.
+        """
         return self.name < other.name
 
     def __str__(self):
+        """
+        Return the string representation.
+        :return: (string) the string representation.
+        """
         return self.name
+
+    def __repr__(self):
+        """
+        Return the string representation.
+        :return: (string) the string representation.
+        """
+        return self.__str__()
 
 
 if __name__ == "__main__":
-    print(generate_action_space(SimpleScalingAction))
-    print(sorted(set(generate_action_space(SimpleScalingAction))))
+    print(sorted(set([action for action in SimpleScalingAction])))
