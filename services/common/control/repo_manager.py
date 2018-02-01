@@ -6,7 +6,7 @@ from services.common.exceptions.repo_manager_exception import RepositoryManagerE
 
 def create_learning_context(repo_manager_conn, context_id, context_params):
     """
-    Initialize the learning context for the specified context.
+    Initialize the qlearning context for the specified context.
     :param repo_manager_conn: (SimpleConnection) the Repository Manager connection.
     :param context_id: (string) the context id.
     :param context_params: (dict) the context parameters.
@@ -31,7 +31,7 @@ def create_learning_context(repo_manager_conn, context_id, context_params):
 
 def remove_learning_context(repo_manager_conn, context_id):
     """
-    Remove the learning context for the specified context.
+    Remove the qlearning context for the specified context.
     :param repo_manager_conn: (SimpleConnection) the Repository Manager connection.
     :param context_id: (string) the context id.
     :return: (void).
@@ -54,10 +54,10 @@ def remove_learning_context(repo_manager_conn, context_id):
 
 def get_learning_context(repo_manager_conn, context_id):
     """
-    Get the learning context for the specified context.
+    Get the qlearning context for the specified context.
     :param repo_manager_conn: (SimpleConnection) the Repository Manager connection.
     :param context_id: (string) the context id.
-    :return: (dict) the learning context.
+    :return: (dict) the qlearning context.
     """
     url = conn_ctrl.format_url("learning_contexts", repo_manager_conn)
 

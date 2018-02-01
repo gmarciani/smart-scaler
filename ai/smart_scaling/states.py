@@ -1,5 +1,5 @@
 from functools import total_ordering
-from services.agents_manager.model.smart_scaling import states_utils
+from smart_scaling import states_utils
 from services.common.util import mathutil
 import itertools
 

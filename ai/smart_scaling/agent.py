@@ -1,8 +1,8 @@
-from agents_manager.model.learning.qlearning_agent import SimpleQLearningAgent as QLearningAgent
-from agents_manager.model.smart_scaling import states
-from agents_manager.model.smart_scaling import actions_utils
-from agents_manager.model.smart_scaling import reward_utils
-from agents_manager.model.smart_scaling.actions import SimpleScalingAction as ScalingAction
+from ai.qlearning.agent import SimpleQLearningAgent as QLearningAgent
+from ai.smart_scaling import states
+from ai.smart_scaling import actions_utils
+from ai.smart_scaling import rewarding
+from ai.smart_scaling.actions import SimpleScalingAction as ScalingAction
 from services.common.util import mathutil
 import random
 import logging
@@ -10,16 +10,6 @@ import logging
 
 # Configure logger
 logger = logging.getLogger(__name__)
-
-DEFAULT_MIN_REPLICAS = 1
-DEFAULT_MAX_REPLICAS = 10
-DEFAULT_STATE_SPACE_GRANULARITY = 10
-
-DEFAULT_ALPHA = 0.5
-DEFAULT_GAMMA = 0.9
-DEFAULT_EPSILON = 0.1
-
-DEFAULT_ROUND = None
 
 
 class SmartScaler:
@@ -60,22 +50,7 @@ class SmartScaler:
         :param curr_state: (ReplicationUtilizationState) the current state.
         :return: (float) the reward
         """
-        replicas = curr_state.replicas
-        utilization = curr_state.utilization
-
-        if replicas == 1 and 0.0 <= utilization <= 0.5: return 10000
-        else:
-            if   0.9 < utilization <= 1.0:  return -100000
-            elif 0.8 < utilization <= 0.9:  return -10000
-            elif 0.7 < utilization <= 0.8:  return -1000
-            elif 0.6 < utilization <= 0.7:  return -100
-            elif 0.5 < utilization <= 0.6:  return 10000
-            elif 0.4 < utilization <= 0.5:  return 10000
-            elif 0.3 < utilization <= 0.4:  return -100
-            elif 0.2 < utilization <= 0.3:  return -1000
-            elif 0.1 < utilization <= 0.2:  return -10000
-            elif 0.0 <= utilization <= 0.1: return -100000
-            else: return -1
+        return self.agent.rewarding_function(curr_state)
 
     def get_replicas(self, curr_state, return_action=False):
         """
@@ -141,11 +116,12 @@ if __name__ == "__main__":
     alpha = 0.5
     gamma = 0.9
     epsilon = 0.1
+    rewarding_function = rewarding.simple_rewarding
 
     scaler = SmartScaler(name, podname, min_replicas, max_replicas, QLearningAgent(
         states.ReplicationUtilizationSpace(min_replicas, max_replicas, granularity, round),
         actions_utils.generate_action_space(ScalingAction),
-        alpha, gamma, epsilon))
+        alpha, gamma, epsilon, rewarding_function))
 
     print(scaler)
     print(scaler.pretty())

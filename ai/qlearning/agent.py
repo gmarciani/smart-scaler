@@ -1,5 +1,7 @@
+from ai.qlearning import rewarding
 from services.common.util import formatutil
 import random
+import itertools
 import logging
 
 
@@ -9,39 +11,40 @@ logger = logging.getLogger(__name__)
 REWARD_MAX = float("inf")
 DEFAULT_Q_VALUE = 0.0
 
+DEFAULT_REWARDING_FUNCTION = rewarding.stupid_rewarding_function
+
 
 class SimpleQLearningAgent:
     """
     A Q-Learning Agent.
     """
 
-    def __init__(self, states, actions, alpha, gamma, epsilon):
+    def __init__(self, states, actions, alpha, gamma, epsilon, rewarding_function=DEFAULT_REWARDING_FUNCTION):
         """
         Create a new Q-Learning agent.
         :param states: (iterable(object)) the state space.
         :param actions: (iterable(object)) the action space.
-        :param alpha: (float) the learning rate (Typical: 0.5).
+        :param alpha: (float) the qlearning rate (Typical: 0.5).
         :param gamma: (float) the discount factor (Typical: 0.9).
         :param epsilon: (float) the exploration factor (Typical: 0.1).
+        :param rewarding_function: (function) the rewardng function (Default: reward_utils.simple_rewarding).
         """
         self.states = states
         self.actions = actions
         self.alpha = alpha
         self.gamma = gamma
         self.epsilon = epsilon
+        self.rewarding_function = rewarding_function
 
-        self.qtable = {}
+        self.qtable = {(s,a): DEFAULT_Q_VALUE for s,a in itertools.product(self.states, self.actions)}
 
-        self._init_qtable()
-
-    def _init_qtable(self):
+    def get_reward(self, curr_state):
         """
-        Initialize the Q table.
-        :return: (void)
+        Compute the reward for the given state.
+        :param curr_state: (ReplicationUtilizationState) the current state.
+        :return: (float) the reward
         """
-        for s in self.states:
-            for a in self.actions:
-                self.qtable[(s, a)] = DEFAULT_Q_VALUE
+        return self.rewarding_function(curr_state)
 
     def get_qvalue(self, state, action):
         """
@@ -54,7 +57,7 @@ class SimpleQLearningAgent:
 
     def learn(self, state_1, action_1, reward, state_2):
         """
-        Execute the learning step.
+        Execute the qlearning step.
         Q(s, a) += alpha * (reward(s,a) + max(Q(s') - Q(s,a))
         Q(s, a) = (1-alpha) * Q(s, a) + alpha * (reward(s, a) + gamma * max_{a}(Q(s,a)))
         :param state_1: (object) the previous state.
@@ -110,6 +113,7 @@ class SimpleQLearningAgent:
         s += "\n\tAlpha: {}".format(self.alpha)
         s += "\n\tGamma: {}".format(self.gamma)
         s += "\n\tEpsilon: {}".format(self.epsilon)
+        s += "\n\tRewarding: {}".format(self.rewarding_function.__module__+"."+self.rewarding_function.__name__)
         s += "\n\tQTable:\n{}".format(formatutil.pprint_qtable(self.qtable))
 
         return s
@@ -119,7 +123,8 @@ class SimpleQLearningAgent:
         Return the string representation.
         :return: (string) the string representation.
         """
-        return "{}({},{},{},{},{})".format(self.__class__.__name__, self.states, self.actions, self.alpha, self.gamma, self.qtable)
+        return "{}({},{},{},{},{},{},{})".format(self.__class__.__name__, self.states, self.actions, self.alpha,
+                                                 self.gamma, self.epsilon, self.rewarding_function, self.qtable)
 
     def __repr__(self):
         """
@@ -130,23 +135,13 @@ class SimpleQLearningAgent:
 
 
 if __name__ == "__main__":
-    states = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    states = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     actions = [-1, 0, 1]
     alpha = 0.5
     gamma = 0.5
     epsilon = 0.1
-    agent = SimpleQLearningAgent(states, actions, alpha, gamma, epsilon)
-
-    def compute_reward(curr_state):
-        if curr_state > 0.5:
-            reward = -100
-        elif curr_state > 0.7:
-            reward = -10000
-        elif curr_state > 0.9:
-            reward = -1000000
-        else:
-            reward = 1000
-        return reward
+    rewarding_function = rewarding.stupid_rewarding_function
+    agent = SimpleQLearningAgent(states, actions, alpha, gamma, epsilon, rewarding_function)
 
     print(agent)
     print(agent.pretty())
@@ -164,7 +159,7 @@ if __name__ == "__main__":
 
         curr_state = random.choice(states)
 
-        reward = compute_reward(curr_state)
+        reward = agent.get_reward(curr_state)
 
         print("State={} | Reward={}".format(curr_state, reward))
 

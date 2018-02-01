@@ -1,4 +1,4 @@
-from agents_manager.model.smart_scaling.actions import SimpleScalingAction as QLearningAction
+from smart_scaling import SimpleScalingAction as QLearningAction
 import logging
 
 
@@ -37,7 +37,7 @@ def compute_action(state_idx, matrix):
     """
     Compute the replication degree.
     :param state_idx: (int) the current Pod state, as matrix integer.
-    :param matrix: (QMatrix) the Q learning matrix.
+    :param matrix: (QMatrix) the Q qlearning matrix.
     :return: (QLearningAction) the suggested action.
     """
     suggested_action_idx = None

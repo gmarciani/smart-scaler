@@ -1,5 +1,5 @@
 from common.control import kubernetes as kubernetes_ctrl
-from agents_manager.model.smart_scaling.agent import SmartScaler
+from smart_scaling import SmartScaler
 from services.common.exceptions.kubernetes_exception import KubernetesException
 from services.common.exceptions.repo_manager_exception import RepositoryManagerException
 import logging
@@ -44,9 +44,9 @@ def add_smart_scaler(smart_scaler, kubernetes_conn, repo_manager_conn, agents):
     initialized = agent_new.has_learning_context()
 
     if initialized:
-        logger.debug("Agent {} already have an initialized learning context".format(agent_new.name))
+        logger.debug("Agent {} already have an initialized qlearning context".format(agent_new.name))
     else:
-        logger.debug("Agent {} does not have any learning context".format(agent_new.name))
+        logger.debug("Agent {} does not have any qlearning context".format(agent_new.name))
 
     attempts = 0
     max_attempts = 3

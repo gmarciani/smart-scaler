@@ -4,10 +4,10 @@ from services.common.exceptions.repo_manager_exception import RepositoryManagerE
 
 def create_learning_context(repo_conn, context_id, context_params):
     """
-    Create a new learning context.
+    Create a new qlearning context.
     :param repo_conn: (SimpleConnection) the repository connection.
     :param context_id: (string) the context id.
-    :param context_params: (dict) the learning parameters.
+    :param context_params: (dict) the qlearning parameters.
     :return: the created context.
     """
     context = {
@@ -21,7 +21,7 @@ def create_learning_context(repo_conn, context_id, context_params):
 
 def update_learning_context(repo_conn, context_id, context):
     """
-    Create a new learning context.
+    Create a new qlearning context.
     :param repo_conn: (SimpleConnection) the repository connection.
     :param context_id: (string) the context id.
     :param context: (dict) the context parameters.
@@ -37,7 +37,7 @@ def update_learning_context(repo_conn, context_id, context):
 
 def delete_learning_context(repo_conn, context_id):
     """
-    Delete a learning context.
+    Delete a qlearning context.
     :param repo_conn: (SimpleConnection) the repository connection.
     :param context_id: (string) the context id.
     :return: the deleted context.
@@ -47,7 +47,7 @@ def delete_learning_context(repo_conn, context_id):
 
 def get_learning_context(repo_conn, context_id):
     """
-    Get a learning context.
+    Get a qlearning context.
     :param repo_conn: (SimpleConnection) the repository connection.
     :param context_id: (string) the context id.
     :return: (dict) the created context.

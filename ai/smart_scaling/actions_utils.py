@@ -1,4 +1,4 @@
-from services.agents_manager.model.smart_scaling.actions import SimpleScalingAction
+from ai.smart_scaling.actions import SimpleScalingAction
 
 
 def generate_action_space(actions):

@@ -11,7 +11,7 @@ learning_contexts = Blueprint("learning_contexts", __name__)
 @learning_contexts.route("/learning_contexts", methods=["PUT"])
 def create_learning_context():
     """
-    Create a new learning context.
+    Create a new qlearning context.
     :return: (json) the response.
     """
     data = request.get_json()
@@ -46,7 +46,7 @@ def create_learning_context():
 @learning_contexts.route("/learning_contexts", methods=["DELETE"])
 def delete_learning_context():
     """
-    Delete a learning context.
+    Delete a qlearning context.
     :return: (json) the response.
     """
     data = request.get_json()
@@ -80,7 +80,7 @@ def delete_learning_context():
 @learning_contexts.route("/learning_contexts", methods=["GET"])
 def get_learning_context():
     """
-    Get a learning context.
+    Get a qlearning context.
     :return: (json) the response.
     """
     data = request.args
@@ -114,7 +114,7 @@ def get_learning_context():
 @learning_contexts.route("/learning_contexts/exists", methods=["GET"])
 def exists_learning_context():
     """
-    Check if learning context exists.
+    Check if qlearning context exists.
     :return: (json) the response.
     """
     data = request.args
@@ -148,7 +148,7 @@ def exists_learning_context():
 @learning_contexts.route("/learning_contexts", methods=["PATCH"])
 def update_learning_context():
     """
-    Update an existing learning context.
+    Update an existing qlearning context.
     :return: (json) the response.
     """
     data = request.get_json()
