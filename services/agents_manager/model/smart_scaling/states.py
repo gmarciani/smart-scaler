@@ -1,5 +1,6 @@
 from functools import total_ordering
 from services.agents_manager.model.smart_scaling import states_utils
+from services.common.util import mathutil
 import itertools
 
 
@@ -52,6 +53,16 @@ class ReplicationUtilizationSpace:
         self.utilization_space = states_utils.generate_space_normalized(granularity, round)
 
         self.space = list(ReplicationUtilizationState(r, u) for (r,u) in itertools.product(self.replication_space, self.utilization_space))
+
+    def map_status2state(self, replicas, utilization):
+        """
+        Get the state for the given status.
+        :param replicas: (int) the number of replicas.
+        :param utilization: (float) the utilization degree.
+        :return: (ReplicationUtilizationState) the state.
+        """
+        utilization_upper_bound = mathutil.get_upper_bound(self.utilization_space, utilization)
+        return next(state for state in self.space if state.replicas == replicas and state.utilization == utilization_upper_bound)
 
     def __iter__(self):
         """

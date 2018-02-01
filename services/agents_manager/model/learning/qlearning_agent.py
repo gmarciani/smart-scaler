@@ -66,7 +66,7 @@ class SimpleQLearningAgent:
         curr_qvalue = self.get_qvalue(state_1, action_1)
         max_qvalue = max([self.get_qvalue(state_2, a) for a in self.actions])
         learned_value = reward + self.gamma * max_qvalue
-        self.qtable[(state_1, action_1)] = (1.0 - self.alpha) * curr_qvalue + alpha * learned_value
+        self.qtable[(state_1, action_1)] = (1.0 - self.alpha) * curr_qvalue + self.alpha * learned_value
 
     def get_action(self, state):
         """

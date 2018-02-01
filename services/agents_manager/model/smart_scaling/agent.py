@@ -1,8 +1,10 @@
 from agents_manager.model.learning.qlearning_agent import SimpleQLearningAgent as QLearningAgent
-from agents_manager.model.smart_scaling import states, states_utils
-from agents_manager.model.smart_scaling import actions, actions_utils
+from agents_manager.model.smart_scaling import states
+from agents_manager.model.smart_scaling import actions_utils
+from agents_manager.model.smart_scaling import reward_utils
 from agents_manager.model.smart_scaling.actions import SimpleScalingAction as ScalingAction
 from services.common.util import mathutil
+import random
 import logging
 
 
@@ -40,25 +42,64 @@ class SmartScaler:
         self.max_replicas = max_replicas
         self.agent = agent
 
+        self.last_state = None
+        self.last_action = None
+
     def map_state(self, replicas, utilization):
         """
         Get the state for the given status.
         :param replicas: (int) the number of replicas.
         :param utilization: (float) the utilization degree.
-        :return: (tuple(replicas, utilization)) the state.
+        :return: (ReplicationUtilizationState) the state.
         """
-        return (replicas, mathutil.get_upper_bound(self.agent.states.utilization_space, utilization))
+        return self.agent.states.map_status2state(replicas, utilization)
 
-    def get_scaling(self, curr_state):
+    def get_reward(self, curr_state):
+        """
+        Compute the reward for the given state.
+        :param curr_state: (ReplicationUtilizationState) the current state.
+        :return: (float) the reward
+        """
+        replicas = curr_state.replicas
+        utilization = curr_state.utilization
+
+        if replicas == 1 and 0.0 <= utilization <= 0.5: return 10000
+        else:
+            if   0.9 < utilization <= 1.0:  return -100000
+            elif 0.8 < utilization <= 0.9:  return -10000
+            elif 0.7 < utilization <= 0.8:  return -1000
+            elif 0.6 < utilization <= 0.7:  return -100
+            elif 0.5 < utilization <= 0.6:  return 10000
+            elif 0.4 < utilization <= 0.5:  return 10000
+            elif 0.3 < utilization <= 0.4:  return -100
+            elif 0.2 < utilization <= 0.3:  return -1000
+            elif 0.1 < utilization <= 0.2:  return -10000
+            elif 0.0 <= utilization <= 0.1: return -100000
+            else: return -1
+
+    def get_replicas(self, curr_state, return_action=False):
         """
         Get the suggested replication degree.
         :param: curr_state (ReplicationUtilizationState) the current state.
-        :return: (int) the suggested replication degree.
+        :param: return_action (bool) if True, return both the new replicas and action performed (Default: False)
+        :return: if *return_action* is True, (replicas, action) ; only replicas, otherwise.
         """
+        reward = self.get_reward(curr_state)
+
+        if self.last_state is not None and self.last_action is not None:
+            self.agent.learn(self.last_state, self.last_action, reward, curr_state)
+
         next_action = self.agent.get_action(curr_state)
         new_replicas = curr_state.replicas + next_action.value
         next_replicas = mathutil.get_bounded(self.min_replicas, self.max_replicas, new_replicas)
-        return next_replicas
+
+        self.last_state = curr_state
+        self.last_action = next_action
+
+        if not return_action:
+            return next_replicas
+        else:
+            return next_replicas, next_action
 
     def pretty(self):
         """
@@ -94,8 +135,8 @@ if __name__ == "__main__":
     name = "ss_my_pod"
     podname = "my_pod"
     min_replicas = 1
-    max_replicas = 10
-    granularity = 10
+    max_replicas = 5
+    granularity = 5
     round=None
     alpha = 0.5
     gamma = 0.9
@@ -108,4 +149,41 @@ if __name__ == "__main__":
 
     print(scaler)
     print(scaler.pretty())
+
+    states = scaler.agent.states
+    actions = scaler.agent.actions
+
+    cnt = {}
+    for state in states:
+        for action in actions:
+            cnt[(state, action)] = 0
+
+    pod_status = {
+        "replicas": min_replicas,
+        "utilization": 0.0
+    }
+
+    iterations = 1000
+    for i in range(iterations):
+        print("Iteration {}/{}".format(i, iterations))
+
+        pod_status["utilization"] = random.random()
+
+        curr_state = scaler.map_state(pod_status["replicas"], pod_status["utilization"])
+
+        new_replicas, action = scaler.get_replicas(curr_state, return_action=True)
+
+        pod_status["replicas"] = new_replicas
+
+        cnt[(curr_state, action)] += 1
+
+        print(scaler.pretty())
+
+        print("-" * 15)
+
+    #for state in scaler.agent.states:
+    #    for action in scaler.agent.actions:
+    #        print("{} => {} : {}".format(state, action, cnt[(state, action)]))
+
+    print("PodStatus: ", pod_status)
 
