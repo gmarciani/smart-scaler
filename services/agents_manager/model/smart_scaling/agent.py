@@ -1,23 +1,25 @@
 from agents_manager.model.learning.qlearning_agent import SimpleQLearningAgent as QLearningAgent
-from services.common.control import kubernetes as kubernetes_ctrl
-from services.common.control import repo_manager as repo_manager_ctrl
-from services.agents_manager.control import qlearning as qlearning_ctrl
-from services.common.exceptions.kubernetes_exception import KubernetesException
-from services.common.exceptions.repo_manager_exception import RepositoryManagerException
-from agents_manager.model.smart_scaling.states import generate_state_space_normalized
-from agents_manager.model.smart_scaling.actions import generate_action_space
+from agents_manager.model.smart_scaling import states
+from agents_manager.model.smart_scaling import actions
 from agents_manager.model.smart_scaling.actions import SimpleScalingAction as ScalingAction
+from services.common.util import mathutil
+from services.common.util import formatutil
+import random
 import logging
 
 
 # Configure logger
 logger = logging.getLogger(__name__)
 
-
+DEFAULT_MIN_REPLICAS = 1
+DEFAULT_MAX_REPLICAS = 10
 DEFAULT_STATE_SPACE_GRANULARITY = 10
 
-DEFAULT_STATES = generate_state_space_normalized(DEFAULT_STATE_SPACE_GRANULARITY)
-DEFAULT_ACTIONS = generate_action_space(ScalingAction)
+DEFAULT_ALPHA = 0.5
+DEFAULT_GAMMA = 0.9
+DEFAULT_EPSILON = 0.1
+
+DEFAULT_ROUND = None
 
 
 class SmartScalingAgentQLearning(QLearningAgent):
@@ -25,110 +27,78 @@ class SmartScalingAgentQLearning(QLearningAgent):
     A Smart Scaling Agent, leveraging Q-Learning.
     """
 
-    def __init__(self, kubernetes_conn, repo_manager_conn, name, pod_name, min_replicas, max_replicas):
+    def __init__(self, name, pod_name, min_replicas, max_replicas, granularity,
+                 alpha=DEFAULT_ALPHA, gamma=DEFAULT_GAMMA, epsilon=DEFAULT_EPSILON,
+                 round=DEFAULT_ROUND):
         """
         Create a new Reinforcement Learning agent.
-        :param kubernetes_conn: (SimpleConnection) the Kubernetes connection.
-        :param repo_manager_conn: (SimpleConnection) the Kubernetes connection.
         :param name: (string) the Smart Scaler name.
         :param pod_name: (string) the Pod name.
         :param min_replicas: (integer) the minimum replication degree.
         :param max_replicas: (integer) the maximum replication degree.
-        :param state_granularity: (integer) the granularity level.
+        :param granularity: (integer) the granularity for utilization space.
+        :param alpha: (float) the learning rate (Default: 0.5).
+        :param gamma: (float) the discount factor (Default: 0.9).
+        :param epsilon: (float) the exploration factor (Default: 0.1).
+        :param round: (integer) the number of decimal to round bounds (Default: None).
         """
-        QLearningAgent.__init__(self, DEFAULT_STATES, DEFAULT_ACTIONS)
-
-        self.kubernetes_conn = kubernetes_conn
-        self.repo_manager_conn = repo_manager_conn
-
+        QLearningAgent.__init__(self,
+                                states.ReplicationUtilizationSpace(min_replicas, max_replicas, granularity, round),
+                                actions.generate_action_space(ScalingAction),
+                                alpha, gamma, epsilon)
         self.name = name
         self.pod_name = pod_name
 
-        self.min_replicas = min_replicas
-        self.max_replicas = max_replicas
-
-        self.last_state = None
-        self.last_action = None
-
-    def create_learning_context(self):
+    def map_state(self, replicas, utilization):
         """
-        Create the learning context within the repository.
-        :return: (void)
+        Get the state for the given status.
+        :param replicas: (int) the number of replicas.
+        :param utilization: (float) the utilization degree.
+        :return: (tuple(replicas, utilization)) the state.
         """
-        context_parameters = {
-            "pod_name": self.pod_name,
-            "alpha": 0.5,
-            "gamma": 0.5,
-            "state_granularity": 10
-        }
+        return (replicas, mathutil.get_upper_bound(self.states.utilization_space, utilization))
 
-        repo_manager_ctrl.create_learning_context(self.repo_manager_conn, self.name, context_parameters)
-
-    def remove_learning_context(self):
+    def get_scaling(self, curr_state):
         """
-        Remove the learning context within the repository.
-        :return: (void)
+        Get the suggested replication degree.
+        :param: curr_state (tuple(replicas, utilization)) the current state.
+        :return: (int) the suggested replication degree.
         """
-        repo_manager_ctrl.remove_learning_context(self.repo_manager_conn, self.name)
+        next_action = super().get_action(curr_state)
+        curr_replicas = curr_state[0]
+        new_replicas = curr_replicas + next_action.value
+        min_replicas = self.states.replication_space.min_replicas
+        min_replicas = self.states.replication_space.max_replicas
 
-    def has_learning_context(self):
+        next_replicas = max(min_replicas, min(max_replicas, new_replicas))
+        return next_replicas
+
+    def pretty(self):
         """
-        Check whether the agent has an already initialized learning context.
-        :return: True, if agent has an already initialized learning context; False, otherwise.
+        Return the pretty string representation.
+        :return: (string) the pretty string representation.
         """
-        return repo_manager_ctrl.exists_learning_context(self.repo_manager_conn, self.name)
+        s = "SmartScalingAgent"
+        s += "\n\tName: {}".format(self.name)
+        s += "\n\tPodName: {}".format(self.pod_name)
+        s += "\n\tMinReplicas: {}".format(self.states.min_replicas)
+        s += "\n\tMaxReplicas: {}".format(self.states.max_replicas)
+        s += "\n\tGranularity: {}".format(self.states.granularity)
+        s += "\n\tStates: {}".format(self.states.space)
+        s += "\n\tActions: {}".format([a.name for a in self.actions])
+        s += "\n\tAlpha: {}".format(self.alpha)
+        s += "\n\tGamma: {}".format(self.gamma)
+        s += "\n\tEpsilon: {}".format(self.epsilon)
+        s += "\n\tQTable:\n{}".format(formatutil.pprint_qtable(self.qtable))
 
-    def apply_scaling_action(self):
-        """
-        Apply the scaling action, connecting to Kubernetes and Repo Manager.
-        :return: (void)
-        """
-        pod_name = self.pod_name
-        try:
-            # Retrieve the learning context
-            learning_context = repo_manager_ctrl.get_learning_context(self.repo_manager_conn, self.name)
-
-            # Compute reward
-            pod_state = kubernetes_ctrl.get_pod_status(self.kubernetes_conn, self.pod_name)
-            reward = qlearning_ctrl.compute_reward(pod_state, self.last_state)
-
-            # Update matrix
-            matrix = learning_context["context"]["matrix"]
-            normalized_state = qlearning_ctrl.compute_normalized_state(pod_state)
-            matrix_state = min(self.state_granularity - 1, int(normalized_state * self.state_granularity))
-            matrix[matrix_state][self.last_action.value] = reward
-
-            # Compute action
-            action = qlearning_ctrl.compute_action(matrix_state, matrix)
-
-            # Execute action
-            current_replicas = pod_state["replicas"]
-            scale_amount = 1 if action is QLearningAction.SCALE_OUT else (-1 if action is QLearningAction.SCALE_IN else 0)
-            suggested_replicas = current_replicas + scale_amount
-            if current_replicas != suggested_replicas:
-                replicas_old, replicas_new = kubernetes_ctrl.set_pod_replicas(self.kubernetes_conn, pod_name, suggested_replicas)
-                logger.info("Pod {} scaled from {} to {}".format(pod_name, replicas_old, replicas_new))
-            else:
-                logger.info("Pod {} not scaled ({} replicas)".format(pod_name, current_replicas))
-
-            # Update agent state
-            self.last_state = pod_state
-            self.last_action = action
-
-            # Backup matrix on repository
-            learning_context["matrix"] = matrix
-            repo_manager_ctrl.update_learning_context(self.repo_manager_conn, self.name, learning_context)
-        except KubernetesException as exc:
-            logger.warning("Error from Kubernetes: {}".format(exc.message))
-        except RepositoryManagerException as exc:
-            logger.warning("Error from Repository Manager: {}".format(exc.message))
+        return s
 
     def __str__(self):
         """
         Return the string representation.
         :return: (string) the string representation.
         """
-        return "Agent({},{},{},{},{},{})".format(self.name, self.pod_name, self.min_replicas, self.max_replicas, self.kubernetes_conn, self.repo_manager_conn)
+        return "{}({},{},{})".format(self.__class__.__name__, self.name, self.pod_name, QLearningAgent.__str__(self))
 
     def __repr__(self):
         """
@@ -136,3 +106,20 @@ class SmartScalingAgentQLearning(QLearningAgent):
         :return: (string) the string representation.
         """
         return self.__str__()
+
+
+if __name__ == "__main__":
+    name = "ss_my_pod"
+    podname = "my_pod"
+    min_replicas = 1
+    max_replicas = 10
+    ugran = 10
+    alpha = 0.5
+    gamma = 0.9
+    epsilon = 0.1
+    agent = SmartScalingAgentQLearning(name, podname, min_replicas, max_replicas, ugran, alpha, gamma, epsilon)
+
+    print(agent)
+    print(agent.pretty())
+
+    

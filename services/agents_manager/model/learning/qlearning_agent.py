@@ -1,3 +1,4 @@
+from services.common.util import formatutil
 import random
 import logging
 
@@ -8,24 +9,20 @@ logger = logging.getLogger(__name__)
 REWARD_MAX = float("inf")
 DEFAULT_Q_VALUE = 0.0
 
-DEFAULT_ALPHA = 0.5
-DEFAULT_GAMMA = 0.9
-DEFAULT_EPSILON = 0.1
-
 
 class SimpleQLearningAgent:
     """
     A Q-Learning Agent.
     """
 
-    def __init__(self, states, actions, alpha=DEFAULT_ALPHA, gamma=DEFAULT_GAMMA, epsilon=DEFAULT_EPSILON):
+    def __init__(self, states, actions, alpha, gamma, epsilon):
         """
         Create a new Q-Learning agent.
-        :param states: (list(object)) the list of state.
-        :param actions: (list(object)) the list of actions.
-        :param alpha: (float) the learning rate (Default: 0.5).
-        :param gamma: (float) the discount factor (Default: 0.9).
-        :param epsilon: (float) the exploration factor (Default: 0.1).
+        :param states: (iterable(object)) the state space.
+        :param actions: (iterable(object)) the action space.
+        :param alpha: (float) the learning rate (Typical: 0.5).
+        :param gamma: (float) the discount factor (Typical: 0.9).
+        :param epsilon: (float) the exploration factor (Typical: 0.1).
         """
         self.states = states
         self.actions = actions
@@ -33,30 +30,27 @@ class SimpleQLearningAgent:
         self.gamma = gamma
         self.epsilon = epsilon
 
-        self.n_states = len(self.states)
-        self.n_actions = len(self.actions)
+        self.qtable = {}
 
-        self.q_table = {}
+        self._init_qtable()
 
-        self._init_q_table()
-
-    def _init_q_table(self):
+    def _init_qtable(self):
         """
         Initialize the Q table.
         :return: (void)
         """
         for s in self.states:
             for a in self.actions:
-                self.q_table[(s, a)] = DEFAULT_Q_VALUE
+                self.qtable[(s, a)] = DEFAULT_Q_VALUE
 
-    def get_q_value(self, state, action):
+    def get_qvalue(self, state, action):
         """
         Get the Q-value for the pair (state, action).
         :param state: (object) the state.
         :param action: (object) the action.
         :return: (float) the Q-value for the pair (state, action).
         """
-        return self.q_table[(state, action)]
+        return self.qtable[(state, action)]
 
     def learn(self, state_1, action_1, reward, state_2):
         """
@@ -69,10 +63,10 @@ class SimpleQLearningAgent:
         :param state_2: (object) the current state.
         :return:
         """
-        curr_q_value = self.get_q_value(state_1, action_1)
-        q_value_max = max([self.get_q_value(state_2, a) for a in self.actions])
-        learned_value = reward + self.gamma * q_value_max
-        self.q_table[(state_1, action_1)] = (1.0 - self.alpha) * curr_q_value + alpha * learned_value
+        curr_qvalue = self.get_qvalue(state_1, action_1)
+        max_qvalue = max([self.get_qvalue(state_2, a) for a in self.actions])
+        learned_value = reward + self.gamma * max_qvalue
+        self.qtable[(state_1, action_1)] = (1.0 - self.alpha) * curr_qvalue + alpha * learned_value
 
     def get_action(self, state):
         """
@@ -90,15 +84,15 @@ class SimpleQLearningAgent:
 
         # if exploitation...
         else:
-            q_values = [self.get_q_value(state, a) for a in self.actions]  # Q values for current state
-            max_q_value = max(q_values)  # maximum Q value for the current state
-            if q_values.count(max_q_value) > 1:  # there is more than one suggested action
-                best_actions_idx = [i for i in range(self.n_actions) if q_values[i] == max_q_value]
+            qvalues = [self.get_qvalue(state, a) for a in self.actions]  # Q values for current state
+            max_qvalue = max(qvalues)  # maximum Q value for the current state
+            if qvalues.count(max_qvalue) > 1:  # there is more than one suggested action
+                best_actions_idx = [i for i in range(len(self.actions)) if qvalues[i] == max_qvalue]
                 next_action_idx = random.choice(best_actions_idx)
                 next_action = self.actions[next_action_idx]
 
             else:  # there is one suggested action, only
-                next_action_idx = q_values.index(max_q_value)
+                next_action_idx = qvalues.index(max_qvalue)
                 next_action = self.actions[next_action_idx]
 
             logger.debug("exploitation for state={} :: {}".format(state, next_action))
@@ -110,21 +104,22 @@ class SimpleQLearningAgent:
         Return the pretty string representation.
         :return: (string) the pretty string representation.
         """
-        string_q_table = " ".join(map(str, self.actions))
-        string_q_table += "\n"
-        for state in self.states:
-            q_values = [self.get_q_value(state, action) for action in self.actions]
-            string_q_table += "{} {}".format(str(state), " ".join(map(str, q_values)))
-            string_q_table += "\n"
+        s = "{}".format(self.__class__.__name__)
+        s += "\n\tStates: {}".format(self.states)
+        s += "\n\tActions: {}".format(self.actions)
+        s += "\n\tAlpha: {}".format(self.alpha)
+        s += "\n\tGamma: {}".format(self.gamma)
+        s += "\n\tEpsilon: {}".format(self.epsilon)
+        s += "\n\tQTable:\n{}".format(formatutil.pprint_qtable(self.qtable))
 
-        return "QLearningAgent\n\tStates: {}\n\tActions: {}\n\tQTable:\n{}".format(self.states, self.actions, string_q_table)
+        return s
 
     def __str__(self):
         """
         Return the string representation.
         :return: (string) the string representation.
         """
-        return "QLearningAgent({},{},{},{},{})".format(self.states, self.actions, self.alpha, self.gamma, self.q_table)
+        return "{}({},{},{},{},{})".format(self.__class__.__name__, self.states, self.actions, self.alpha, self.gamma, self.qtable)
 
     def __repr__(self):
         """
@@ -163,7 +158,7 @@ if __name__ == "__main__":
 
     last_state = None
     last_action = None
-    iterations = 1000
+    iterations = 10
     for i in range(iterations):
         print("Iteration {}/{}".format(i, iterations))
 
