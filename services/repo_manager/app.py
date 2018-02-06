@@ -1,18 +1,28 @@
-import sys, os
 from flask import Flask
-_ppath = os.path.join(os.path.realpath(__file__), "..", "..")
-print(_ppath)
-sys.path.append(_ppath)
+from services.repo_manager.api.status import status as api_status
+from services.repo_manager.api.repo import repo as api_repo
+from services.repo_manager.api.learning_contexts import learning_contexts as api_learning_contexts
+from services.common.logs import config as log_configurator
+from services.agents_manager.control.shutdown_hooks import simple_shutdown_hook
+import logging
+import atexit
 
-from services.repo_manager.api.base import base
 
 # Initialization
 app = Flask(__name__)
-app.config.from_object("config.Default")
+app.config.from_object("config.Debug")
 
-# Blueprints
-app.register_blueprint(base)
+# Configure logging
+log_configurator.configure_logging(logging, app.config["LOG_LEVEL"])
+
+# Routes
+app.register_blueprint(api_status)
+app.register_blueprint(api_repo)
+app.register_blueprint(api_learning_contexts)
+
+# Shutdown Hooks
+atexit.register(simple_shutdown_hook, "My Shutdown Param")
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=app.config["REPO_MANAGER_PORT"])
+    app.run(host="0.0.0.0", port=app.config["REPO_MANAGER_PORT"], threaded=True)

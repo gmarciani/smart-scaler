@@ -3,7 +3,8 @@
 # VENDOR                Giacomo Marciani
 # VERSION               1.0.0
 
-FROM ubuntu:latest
+#FROM ubuntu:latest
+FROM python:3.6
 
 # Update OS
 RUN apt-get update -y
@@ -19,8 +20,9 @@ ADD . /app
 # Change working directory
 WORKDIR /app
 
-# Install Python dependencies
-RUN pip3 install -r requirements.txt
+COPY ./requirements.txt ./requirements.txt
+
+RUN pip install -r requirements.txt
 
 # Make port 18003 available to the world outside this container
 EXPOSE 18003

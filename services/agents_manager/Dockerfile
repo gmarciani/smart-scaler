@@ -5,7 +5,8 @@
 
 FROM ubuntu:latest
 
-# Update OS
+LABEL Description="Smart Scaler / Agents Manager" Vendor="Giacomo Marciani" Version="1.0.0"
+
 RUN apt-get update -y
 RUN apt-get upgrade -y
 

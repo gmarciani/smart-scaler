@@ -19,8 +19,9 @@ ADD . /app
 # Change working directory
 WORKDIR /app
 
-# Install Python dependencies
-RUN pip3 install -r requirements.txt
+COPY ./requirements.txt ./requirements.txt
+
+RUN pip install -r requirements.txt
 
 # Make port 18001 available to the world outside this container
 EXPOSE 18001
