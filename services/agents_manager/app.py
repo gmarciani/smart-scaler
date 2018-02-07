@@ -1,30 +1,31 @@
 from flask import Flask
-from common.control import logs as log_configurator
-from services.agents_manager.api.status import status as api_status
-from services.agents_manager.control import scheduler as scheduler_ctrl
+from services.common.control import logs as log_config
+from services.common.control import errors as err_config
+from services.common.control import lifecycle as lifecycle_config
 from services.common.control import shutdown as shutdown_ctrl
-import logging
+
+from services.agents_manager.config import Debug as AppConfig
+from services.agents_manager.rest import api as api_config
 
 
 # Initialization
 app = Flask(__name__)
-app.config.from_object("config.Debug")
+app.config.from_object(AppConfig)
+
+# REST API
+api_config.configure(app)
 
 # Configure logging
-log_configurator.configure(logging, app.config["LOG_LEVEL"])
+log_config.configure(app)
 
-# Routes
-app.register_blueprint(api_status)
+# Errors
+err_config.configure(app)
 
-# Scheduled Jobs
-scheduler_ctrl.get_scheduler().start()
+# Teardown
+lifecycle_config.add_teardown_hook(app, database_ctrl.teardown_database)
 
-
-# Teardown Hooks
-@app.teardown_appcontext
-def teardown(exception):
-    scheduler_ctrl.teardown_scheduler()
-    shutdown_ctrl.goodbye()
+# Shutdown
+lifecycle_config.add_shutdown_hook(shutdown_ctrl.goodbye)
 
 
 if __name__ == "__main__":

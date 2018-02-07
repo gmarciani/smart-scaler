@@ -1,5 +1,5 @@
 import unittest
-from services.redis_simulator.app import app
+from services.kubernetes.app import app
 
 
 class SimpleTestCase(unittest.TestCase):

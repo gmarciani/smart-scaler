@@ -1,25 +1,28 @@
 from flask import Flask
-from services.api_gateway.api.status import status as api_status
-from common.control import logs as log_configurator
+from services.common.control import logs as log_config
+from services.common.control import errors as err_config
+from services.common.control import lifecycle as lifecycle_config
 from services.common.control import shutdown as shutdown_ctrl
-import logging
+
+from services.api_gateway.config import Debug as AppConfig
+from services.api_gateway.rest import api as api_config
 
 
 # Initialization
 app = Flask(__name__)
-app.config.from_object("config.Debug")
+app.config.from_object(AppConfig)
+
+# REST API
+api_config.configure(app)
 
 # Configure logging
-log_configurator.configure(logging, app.config["LOG_LEVEL"])
+log_config.configure(app)
 
-# Routes
-app.register_blueprint(api_status)
+# Errors
+err_config.configure(app)
 
-
-# Teardown Hooks
-@app.teardown_appcontext
-def teardown(exception):
-    shutdown_ctrl.goodbye()
+# Shutdown
+lifecycle_config.add_shutdown_hook(shutdown_ctrl.goodbye)
 
 
 if __name__ == "__main__":

@@ -1,31 +1,31 @@
 from flask import Flask
-from services.kubernetes_simulator.api.status import status as api_status
-from services.kubernetes_simulator.api.pods import pods as api_pods
-from services.kubernetes_simulator.api.smart_scalers import smart_scalers as api_smart_scalers
-from common.control import logs as log_configurator
-from services.kubernetes_simulator.control import registry as registry_ctrl
+from services.common.control import logs as log_config
+from services.common.control import errors as err_config
+from services.common.control import lifecycle as lifecycle_config
 from services.common.control import shutdown as shutdown_ctrl
-import logging
+
+from services.kubernetes_simulator.config import Debug as AppConfig
+from services.kubernetes_simulator.rest import api as api_config
 
 
 # Initialization
 app = Flask(__name__)
-app.config.from_object("config.Debug")
+app.config.from_object(AppConfig)
+
+# REST API
+api_config.configure(app)
 
 # Configure logging
-log_configurator.configure(logging, app.config["LOG_LEVEL"])
+log_config.configure(app)
 
-# Routes
-app.register_blueprint(api_status)
-app.register_blueprint(api_pods)
-app.register_blueprint(api_smart_scalers)
+# Errors
+err_config.configure(app)
 
+# Teardown
+lifecycle_config.add_teardown_hook(app, database_ctrl.teardown_database)
 
-# Teardown Hooks
-@app.teardown_appcontext
-def teardown(exception):
-    registry_ctrl.teardown_registry()
-    shutdown_ctrl.goodbye()
+# Shutdown
+lifecycle_config.add_shutdown_hook(shutdown_ctrl.goodbye)
 
 
 if __name__ == "__main__":
