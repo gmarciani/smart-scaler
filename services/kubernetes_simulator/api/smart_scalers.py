@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
-from datetime import datetime
-from services.kubernetes_simulator.model.registry import PODS_DB, SMART_SCALERS
+from services.kubernetes_simulator.control import registry as registry_ctrl
 from common.model.smart_scaler import SmartScaler
+from datetime import datetime
 from copy import deepcopy
 
 
@@ -19,14 +19,14 @@ def get_smart_scalers():
     if "name" not in data.keys():  # get all smart scalers
         response = {
             "ts": datetime.now(),
-            "smart_scalers": [vars(smart_scaler) for smart_scaler in SMART_SCALERS.values()]
+            "smart_scalers": [vars(smart_scaler) for smart_scaler in registry_ctrl.get_registry().get_smart_scalers().values()]
         }
 
     else:  # get specific smart scaler
         smart_scaler_name = request.args["name"]
 
         try:
-            smart_scaler = SMART_SCALERS[smart_scaler_name]
+            smart_scaler = registry_ctrl.get_registry().get_smart_scalers()[smart_scaler_name]
         except KeyError:
             response = {
                 "ts": datetime.now(),
@@ -63,21 +63,21 @@ def create_smart_scaler():
     smart_scaler_min_replicas = int(data["min_replicas"]) if "min_replicas" in data else 1
     smart_scaler_max_replicas = int(data["max_replicas"]) if "max_replicas" in data else float("inf")
 
-    if smart_scaler_name in SMART_SCALERS:
+    if smart_scaler_name in registry_ctrl.get_registry().get_smart_scalers():
         response = {
             "ts": datetime.now(),
             "error": "Cannot create Smart Scaler {} because it already exists".format(smart_scaler_name)
         }
         return jsonify(response), 400
 
-    if pod_name not in PODS_DB:
+    if pod_name not in registry_ctrl.get_registry().get_pods():
         response = {
             "ts": datetime.now(),
             "error": "Cannot create Smart Scaler {} because Pod {} does not exist".format(smart_scaler_name, pod_name)
         }
         return jsonify(response), 400
 
-    if any(smart_scaler.pod_name == pod_name for smart_scaler in SMART_SCALERS.values()):
+    if any(smart_scaler.pod_name == pod_name for smart_scaler in registry_ctrl.get_registry().get_smart_scalers().values()):
         response = {
             "ts": datetime.now(),
             "error": "Cannot create Smart Scaler {} because Pod {} has been already associated to another Smart Scaler".format(smart_scaler_name, pod_name)
@@ -85,7 +85,7 @@ def create_smart_scaler():
         return jsonify(response), 400
 
     smart_scaler_new = SmartScaler(smart_scaler_name, pod_name, smart_scaler_min_replicas, smart_scaler_max_replicas)
-    SMART_SCALERS[smart_scaler_name] = smart_scaler_new
+    registry_ctrl.get_registry().get_smart_scalers()[smart_scaler_name] = smart_scaler_new
 
     response = {
         "ts": datetime.now(),
@@ -113,8 +113,8 @@ def delete_smart_scaler():
         return jsonify(response), 400
 
     try:
-        smart_scaler_deleted = deepcopy(SMART_SCALERS[smart_scaler_name])
-        del SMART_SCALERS[smart_scaler_name]
+        smart_scaler_deleted = deepcopy(registry_ctrl.get_registry().get_smart_scalers()[smart_scaler_name])
+        del registry_ctrl.get_registry().get_smart_scalers()[smart_scaler_name]
     except KeyError:
         response = {
             "ts": datetime.now(),

@@ -1,5 +1,5 @@
 from common.control import kubernetes as kubernetes_ctrl
-from smart_scaling import SmartScaler
+from ai.smart_scaling import SmartScaler
 from services.common.exceptions.kubernetes_exception import KubernetesException
 from services.common.exceptions.repo_manager_exception import RepositoryManagerException
 import logging
@@ -9,23 +9,19 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def get_all_smart_scalers(kubernetes_conn, repo_manager_conn, manager_id):
+def get_all_smart_scalers(kubernetes_conn):
     """
     Get all Smart Scalers for the specified agents manager.
     :param kubernetes_conn: (SimpleConnection) the Kubernetes connection.
-    :param repo_manager_conn: (SimpleConnection) the Kubernetes connection.
-    :param manager_id (string): the agents manager id.
     :return: (list) the list of Smart Scalers for the specified agents manager.
     """
     smart_scalers_all = kubernetes_ctrl.get_all_smart_scalers(kubernetes_conn)
-    # TODO smart_scalers
-    # smart_scalers = repo_manager_ctrl.get_all_smart_scalers(repo_manager_conn, manager_id)
     return smart_scalers_all
 
 
-def add_smart_scaler(smart_scaler, kubernetes_conn, repo_manager_conn, agents):
+def add_local_smart_scaler(smart_scaler, kubernetes_conn, repo_manager_conn, agents):
     """
-    Add a Smart Scaler.
+    Add a Smart Scaler, locally.
     :param smart_scaler_name: (string) the Smart Scaler name.
     :param kubernetes_conn: (SimpleConnection) the Kubernetes connection.
     :param repo_manager_conn: (SimpleConnection) the Kubernetes connection.
@@ -68,9 +64,9 @@ def add_smart_scaler(smart_scaler, kubernetes_conn, repo_manager_conn, agents):
         logger.debug("Added Smart Scaler {}".format(agent_new))
 
 
-def delete_smart_scaler(smart_scaler_name, agents):
+def delete_local_smart_scaler(smart_scaler_name, agents):
     """
-    Delete a Smart Scaler.
+    Delete a Smart Scaler, locally.
     :param smart_scaler_name: (string) the Smart Scaler name.
     :param agents: (dict) the repository of agents ({smart_scaler_name: agent}).
     :return: (void)

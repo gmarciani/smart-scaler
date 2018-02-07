@@ -12,8 +12,8 @@ class Default:
 
     LOG_LEVEL = "INFO"
 
-    REDIS_HOST = "localhost"
-    REDIS_PORT = 18009
+    REPOSITORY_HOST = "localhost"
+    REPOSITORY_PORT = 18009
 
 
 class Debug(Default):

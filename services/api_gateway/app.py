@@ -1,9 +1,8 @@
 from flask import Flask
 from services.api_gateway.api.status import status as api_status
-from services.common.logs import config as log_configurator
-from services.agents_manager.control.shutdown_hooks import simple_shutdown_hook
+from common.control import logs as log_configurator
+from services.common.control import shutdown as shutdown_ctrl
 import logging
-import atexit
 
 
 # Initialization
@@ -11,13 +10,16 @@ app = Flask(__name__)
 app.config.from_object("config.Debug")
 
 # Configure logging
-log_configurator.configure_logging(logging, app.config["LOG_LEVEL"])
+log_configurator.configure(logging, app.config["LOG_LEVEL"])
 
 # Routes
 app.register_blueprint(api_status)
 
-# Shutdown Hooks
-atexit.register(simple_shutdown_hook, "My Shutdown Param")
+
+# Teardown Hooks
+@app.teardown_appcontext
+def teardown(exception):
+    shutdown_ctrl.goodbye()
 
 
 if __name__ == "__main__":

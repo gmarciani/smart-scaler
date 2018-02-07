@@ -2,7 +2,7 @@ from flask import current_app, g
 from common.model.connection import SimpleConnection
 
 
-SERVICES = ["api_gateway", "agents_manager", "repo_manager", "redis", "kubernetes"]
+SERVICES = ["api_gateway", "agents_manager", "repository", "kubernetes"]
 
 
 def _build_services_map(services):

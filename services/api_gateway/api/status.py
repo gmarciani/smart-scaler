@@ -5,7 +5,7 @@ from services.common.control import status as status_ctrl
 
 status = Blueprint("status", __name__)
 
-SERVICES = ["agents_manager", "repo_manager"]
+SERVICES = ["agents_manager", "repository", "kubernetes"]
 
 
 @status.route("/status", methods=["GET"])

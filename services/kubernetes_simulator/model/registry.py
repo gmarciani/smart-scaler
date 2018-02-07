@@ -3,6 +3,28 @@ Simulation of Kubernetes registry.
 """
 
 
-SMART_SCALERS = {}  # the registry of Smart Scalers {smart_scaler_name: SmartScaler}
+class SimpleKubernetesRegistry:
+    """
+    A simple Kubernetes registry.
+    """
 
-PODS_DB = {}  # the dictionary of Pods {pod_name: Pod}
+    def __init__(self):
+        """
+        Create a new Kubernetes registry.
+        """
+        self._pods = {}
+        self._smart_scalers = {}
+
+    def get_pods(self):
+        """
+        Retrieve pods.
+        :return: pods.
+        """
+        return self._pods
+
+    def get_smart_scalers(self):
+        """
+        Retrieve smart scalers.
+        :return: smart scalers.
+        """
+        return self._smart_scalers

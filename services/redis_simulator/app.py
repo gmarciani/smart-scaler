@@ -1,26 +1,32 @@
 from flask import Flask
-from services.redis_simulator.api.status import status as api_status
-from services.redis_simulator.api.database import database as api_database
-from services.common.logs import config as log_configurator
-from services.agents_manager.control.shutdown_hooks import simple_shutdown_hook
-import logging
-import atexit
+from services.redis_simulator.config import Debug as AppConfig
+from services.redis_simulator.rest import api as api_config
+from services.common.control import logs as log_config
+from services.common.control import errors as err_config
+from services.common.control import lifecycle as lifecycle_config
+from services.redis_simulator.control import database as database_ctrl
+from services.common.control import shutdown as shutdown_ctrl
 
 
 # Initialization
 app = Flask(__name__)
-app.config.from_object("config.Debug")
+app.config.from_object(AppConfig)
+
+# REST API
+api_config.configure(app)
 
 # Configure logging
-log_configurator.configure_logging(logging, app.config["LOG_LEVEL"])
+log_config.configure(app)
 
-# Routes
-app.register_blueprint(api_status)
-app.register_blueprint(api_database)
+# Errors
+err_config.configure(app)
 
-# Shutdown Hooks
-atexit.register(simple_shutdown_hook, "My Shutdown Param")
+# Teardown
+lifecycle_config.add_teardown_hook(app, database_ctrl.teardown_database)
+
+# Shutdown
+lifecycle_config.add_shutdown_hook(shutdown_ctrl.goodbye)
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=app.config["REDIS_PORT"], threaded=True)
+    app.run(host="0.0.0.0", port=app.config["REPOSITORY_PORT"], threaded=True)

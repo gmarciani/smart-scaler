@@ -11,9 +11,7 @@ def get_statuses(services, config):
     :param config: (dict) the current app configuration.
     :return: (dict) a dictionary {service_name: status}.
     """
-    statuses = dict([(service, get_status_service(conn_ctrl.get_service_connection(service))) for service in services])
-
-    return statuses
+    return dict([(service, get_status_service(conn_ctrl.get_service_connection(service))) for service in services])
 
 
 def get_status_service(service_conn):
@@ -27,7 +25,7 @@ def get_status_service(service_conn):
     try:
         return requests.get(url).json()
     except requests.ConnectionError or json.JSONDecodeError:
-        return {"status": "UNREACHABLE"}
+        return dict(status="UNREACHABLE")
 
 
 def compose_status_respose(statuses):
@@ -36,13 +34,9 @@ def compose_status_respose(statuses):
     :param statuses: (dict) dictionary of statuses (service_name, status)
     :return: (dict) the response.
     """
-    response = {
-       "ts": datetime.now(),
-       "status": "OK" if all(map(lambda x: x["status"] == "OK", statuses.values())) else "FAILED",
-       "services": statuses
-    }
-
-    return response
+    return dict(
+        status="OK" if all(map(lambda x: x["status"] == "OK", statuses.values())) else "FAILED",
+        services=statuses)
 
 
 def compose_status_fake():
@@ -50,9 +44,4 @@ def compose_status_fake():
     Compose the fake status reponse.
     :return: (dict) the response.
     """
-    response = {
-        "ts": datetime.now(),
-        "status": "OK"
-    }
-
-    return response
+    return dict(status="OK")

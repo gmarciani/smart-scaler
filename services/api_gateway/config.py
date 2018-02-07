@@ -17,15 +17,12 @@ class Default:
     AGENTS_MANAGER_HOST = "localhost"
     AGENTS_MANAGER_PORT = 18002
 
-    REPO_MANAGER_HOST = "localhost"
-    REPO_MANAGER_PORT = 18003
-
     KUBERNETES_HOST = "localhost"
     KUBERNETES_PORT = 18008
     KUBERNETES_PULL = 10  # seconds
 
-    REDIS_HOST = "localhost"
-    REDIS_PORT = 18009
+    REPOSITORY_HOST = "localhost"
+    REPOSITORY_PORT = 18009
 
 
 class Debug(Default):

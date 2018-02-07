@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
-from datetime import datetime
-from services.kubernetes_simulator.model.registry import PODS_DB, SMART_SCALERS
+from services.kubernetes_simulator.control import registry as registry_ctrl
 from common.model.pod import Pod
+from datetime import datetime
 from copy import deepcopy
 
 
@@ -19,14 +19,14 @@ def get_pods():
     if "name" not in data.keys():  # get all pods
         response = {
             "ts": datetime.now(),
-            "pods": [vars(pod) for pod in PODS_DB.values()]
+            "pods": [vars(pod) for pod in registry_ctrl.get_registry().get_pods().values()]
         }
 
     else:  # get specific pod
         pod_name = data["name"]
 
         try:
-            pod = PODS_DB[pod_name]
+            pod = registry_ctrl.get_registry().get_pods()[pod_name]
         except KeyError:
             response = {
                 "ts": datetime.now(),
@@ -61,7 +61,7 @@ def create_pod():
 
     pod_replicas = int(data["replicas"]) if "replicas" in data else 1
 
-    if pod_name in PODS_DB:
+    if pod_name in registry_ctrl.get_registry().get_pods():
         response = {
             "ts": datetime.now(),
             "error": "Cannot create Pod {} because it already exists".format(pod_name)
@@ -69,7 +69,7 @@ def create_pod():
         return jsonify(response), 400
 
     pod_new = Pod(pod_name, pod_replicas)
-    PODS_DB[pod_name] = pod_new
+    registry_ctrl.get_registry().get_pods()[pod_name] = pod_new
 
     response = {
         "ts": datetime.now(),
@@ -97,8 +97,8 @@ def delete_pod():
         return jsonify(response), 400
 
     try:
-        pod_deleted = deepcopy(PODS_DB[pod_name])
-        del PODS_DB[pod_name]
+        pod_deleted = deepcopy(registry_ctrl.get_registry().get_pods()[pod_name])
+        del registry_ctrl.get_registry().get_pods()[pod_name]
     except KeyError:
         response = {
             "ts": datetime.now(),
@@ -106,12 +106,12 @@ def delete_pod():
         }
         return jsonify(response), 404
 
-    smart_scaler_name_to_delete = next((x.name for x in SMART_SCALERS.values() if x.pod_name == pod_name), None)
+    smart_scaler_name_to_delete = next((x.name for x in registry_ctrl.get_registry().get_smart_scalers().values() if x.pod_name == pod_name), None)
 
     smart_scaler_deleted = None
     if smart_scaler_name_to_delete is not None:
-        smart_scaler_deleted = deepcopy(SMART_SCALERS[smart_scaler_name_to_delete])
-        del SMART_SCALERS[smart_scaler_name_to_delete]
+        smart_scaler_deleted = deepcopy(registry_ctrl.get_registry().get_smart_scalers()[smart_scaler_name_to_delete])
+        del registry_ctrl.get_registry().get_smart_scalers()[smart_scaler_name_to_delete]
 
     response = {
         "ts": datetime.now(),
@@ -141,7 +141,7 @@ def scale_pod():
         return jsonify(response), 400
 
     try:
-        pod_scaled = PODS_DB[pod_name]
+        pod_scaled = registry_ctrl.get_registry().get_pods()[pod_name]
         replicas_old = pod_scaled.replicas
         pod_scaled.replicas = pod_replicas
     except KeyError:
@@ -178,7 +178,7 @@ def get_pod_status():
         return jsonify(response), 400
 
     try:
-        pod = PODS_DB[pod_name]
+        pod = registry_ctrl.get_registry().get_pods()[pod_name]
     except KeyError:
         response = {
             "ts": datetime.now(),
@@ -217,7 +217,7 @@ def set_pod_status():
         return jsonify(response), 400
 
     try:
-        pod = PODS_DB[pod_name]
+        pod = registry_ctrl.get_registry().get_pods()[pod_name]
         pod.cpu_utilization = pod_cpu_utilization
     except KeyError:
         response = {
