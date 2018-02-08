@@ -1,6 +1,6 @@
 from flask_restful import Api
-from services.redis_simulator.rest.status import Status
-from services.redis_simulator.rest.database import Database
+from services.redis_simulator.api.status import Status
+from services.redis_simulator.api.database import Database
 from datetime import datetime
 from flask import jsonify
 

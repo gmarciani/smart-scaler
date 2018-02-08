@@ -1,31 +1,29 @@
-from flask import Flask
-from services.common.control import logs as log_config
-from services.common.control import errors as err_config
-from services.common.control import lifecycle as lifecycle_config
+from services.common.environment.webapp import WebApp as App
 from services.common.control import shutdown as shutdown_ctrl
-
 from services.kubernetes_simulator.config import Debug as AppConfig
-from services.kubernetes_simulator.rest import api as api_config
+from services.kubernetes_simulator.api.status import Status
+from services.kubernetes_simulator.api.registry import Pods, SmartScalers
+from services.kubernetes_simulator.api.heapster import PodMetrics
+from services.kubernetes_simulator.control import heapster as heapster_ctrl
+from services.kubernetes_simulator.control import registry as registry_ctrl
 
 
 # Initialization
-app = Flask(__name__)
-app.config.from_object(AppConfig)
+app = App(__name__, AppConfig)
 
 # REST API
-api_config.configure(app)
+app.add_rest_api(Status, "/status")
+app.add_rest_api(Pods, "/registry/pods")
+app.add_rest_api(SmartScalers, "/registry/smart_scalers")
+app.add_rest_api(PodMetrics, "/heapster/pods")
 
-# Configure logging
-log_config.configure(app)
-
-# Errors
-err_config.configure(app)
 
 # Teardown
-lifecycle_config.add_teardown_hook(app, database_ctrl.teardown_database)
+app.add_teardown_hook(registry_ctrl.teardown_registry())
+app.add_teardown_hook(heapster_ctrl.teardown_heapster())
 
 # Shutdown
-lifecycle_config.add_shutdown_hook(shutdown_ctrl.goodbye)
+app.add_shutdown_hook(shutdown_ctrl.goodbye)
 
 
 if __name__ == "__main__":

@@ -2,15 +2,19 @@ from flask import g
 from services.kubernetes_simulator.model.registry import SimpleKubernetesRegistry as KubernetesRegistry
 
 
+REGISTRY = KubernetesRegistry()
+
+
 def get_registry():
     """
     Retrieve the registry.
     :return: (dict) the registry.
     """
-    registry = getattr(g, "_registry", None)
-    if registry is None:
-        registry = g._registry = __init_registry()
-    return registry
+    return REGISTRY
+    #registry = getattr(g, "_registry", None)
+    #if registry is None:
+    #    registry = g._registry = __init_registry()
+    #return registry
 
 
 def teardown_registry():
@@ -18,9 +22,10 @@ def teardown_registry():
     Teardown the registry.
     :return: (void)
     """
-    registry = getattr(g, "_registry", None)
-    if registry is not None:
-        setattr(g, "_registry", None)
+    pass
+    #registry = getattr(g, "_registry", None)
+    #if registry is not None:
+    #    setattr(g, "_registry", None)
 
 
 def __init_registry():

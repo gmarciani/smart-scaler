@@ -1,5 +1,5 @@
 from flask_restful import Api
-from services.api_gateway.rest.status import Status
+from services.api_gateway.api.status import Status
 from datetime import datetime
 from flask import jsonify
 

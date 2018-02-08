@@ -1,16 +1,16 @@
 """
-Simulation of Kubernetes registry.
+Simulation of Kubernetes Registry.
 """
 
 
 class SimpleKubernetesRegistry:
     """
-    A simple Kubernetes registry.
+    A simple Kubernetes Registry.
     """
 
     def __init__(self):
         """
-        Create a new Kubernetes registry.
+        Create a new Kubernetes Registry.
         """
         self._pods = {}
         self._smart_scalers = {}
