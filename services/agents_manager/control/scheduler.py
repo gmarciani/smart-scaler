@@ -8,6 +8,9 @@ from services.common.exceptions.kubernetes_exception import KubernetesException
 from services.common.exceptions.repo_manager_exception import RepositoryManagerException
 
 
+SCHEDULER = __init_scheduler()
+
+
 def get_scheduler():
     """
     Retrieve the scheduler.

@@ -1,13 +1,15 @@
 from flask import Flask, jsonify
 from flask_restful import Api
+from services.common.environment.responses import output_json
 from werkzeug.exceptions import default_exceptions
-from datetime import datetime
 from services.common.control import exception_handler as error_ctrl
 import atexit
 import logging
 
 
 FORMAT = "[%(name)s:%(lineno)s - %(funcName)30s] %(message)s"
+
+REPRESENTATIONS = [("application/json", output_json)]
 
 
 class WebApp(Flask):
@@ -26,10 +28,7 @@ class WebApp(Flask):
         self.api = Api(self)
 
         # JSON Response
-        @self.api.representations
-        def output_json(data, code, headers=None):
-            data["timestamp"] = datetime.now()
-            return jsonify(data)
+        self.api.representations = REPRESENTATIONS
 
         # Error Handling
         for exc in default_exceptions:
@@ -59,7 +58,7 @@ class WebApp(Flask):
         :param kwargs: optional keyword arguments to pass to func
         :return: None
         """
-        self.teardown_appcontext(func, args, kwargs)
+        self.teardown_appcontext(func)
 
     def add_shutdown_hook(self, func, *args, **kwargs):
         """

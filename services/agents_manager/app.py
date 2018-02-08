@@ -1,31 +1,20 @@
-from flask import Flask
-from services.common.control import logs as log_config
-from services.common.control import errors as err_config
-from services.common.control import lifecycle as lifecycle_config
+from services.common.environment.webapp import WebApp as App
 from services.common.control import shutdown as shutdown_ctrl
-
 from services.agents_manager.config import Debug as AppConfig
-from services.agents_manager.rest import api as api_config
+from services.agents_manager.api.status import Status
 
 
 # Initialization
-app = Flask(__name__)
-app.config.from_object(AppConfig)
+app = App(__name__, AppConfig)
 
 # REST API
-api_config.configure(app)
-
-# Configure logging
-log_config.configure(app)
-
-# Errors
-err_config.configure(app)
+app.add_rest_api(Status, "/status")
 
 # Teardown
-lifecycle_config.add_teardown_hook(app, database_ctrl.teardown_database)
+#app.add_teardown_hook(database_ctrl.teardown_database)
 
 # Shutdown
-lifecycle_config.add_shutdown_hook(shutdown_ctrl.goodbye)
+app.add_shutdown_hook(shutdown_ctrl.goodbye)
 
 
 if __name__ == "__main__":

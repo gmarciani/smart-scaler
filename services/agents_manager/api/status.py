@@ -1,21 +1,15 @@
-from flask import Blueprint, current_app
-from flask import jsonify
+from flask_restful import Resource
 from services.common.control import status as status_ctrl
 
 
-status = Blueprint("status", __name__)
-
-SERVICES = ["kubernetes", "repo_manager"]
-
-
-@status.route("/status", methods=["GET"])
-def get_status():
+class Status(Resource):
     """
-    Get the status of the service.
-    :return: (json) the status of the service.
+    Status of the service.
     """
-    statuses = status_ctrl.get_statuses(SERVICES, current_app.config)
 
-    response = status_ctrl.compose_status_respose(statuses)
-
-    return jsonify(response)
+    def get(self):
+        """
+        Get the status of the service.
+        :return: the status of the service.
+        """
+        return status_ctrl.compose_status_fake()
