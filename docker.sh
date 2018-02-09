@@ -1,46 +1,86 @@
 #!/bin/bash
 
-HOME_DIR = "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+##
+# Run Docker containers.
+#
+# @Usage: bash docker.sh
+##
 
-API_GATEWAY_CONTAINER = "api_gateway"
-API_GATEWAY_IMAGE = "smart_scaler_api_gateway"
-API_GATEWAY_IMAGE_VERSION = "1.0.0"
-API_GATEWAY_DOCKER_PATH = "${HOME_DIR}/services/api_gateway"
-API_GATEWAY_PORT = 18001
+HOME_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SERVICES_DIR="${HOME_DIR}/services"
 
-AGENTS_MANAGER_CONTAINER = "agents_manager"
-AGENTS_MANAGER_IMAGE = "smart_scaler_agents_manager"
-AGENTS_MANAGER_IMAGE_VERSION = "1.0.0"
-AGENTS_MANAGER_DOCKER_PATH = "${HOME_DIR}/services/agents_manager"
-AGENTS_MANAGER_PORT = 18002
+##
+# SERVICE: API GATEWAY
+##
+API_GATEWAY_CONTAINER="api_gateway"
+API_GATEWAY_IMAGE="smart_scaler_api_gateway"
+API_GATEWAY_IMAGE_VERSION="1.0.0"
+API_GATEWAY_DOCKER_PATH="${SERVICES_DIR}/api_gateway"
+API_GATEWAY_PORT=18001
 
-REPO_MANAGER_CONTAINER = "repo_manager"
-REPO_MANAGER_IMAGE = "smart_scaler_repo_manager"
-REPO_MANAGER_IMAGE_VERSION = "1.0.0"
-REPO_MANAGER_DOCKER_PATH = "${HOME_DIR}/services/repo_manager"
-REPO_MANAGER_PORT = 18003
+##
+# SERVICE: AGENTS MANAGER
+##
+AGENTS_MANAGER_CONTAINER="agents_manager"
+AGENTS_MANAGER_IMAGE="smart_scaler_agents_manager"
+AGENTS_MANAGER_IMAGE_VERSION="1.0.0"
+AGENTS_MANAGER_DOCKER_PATH="${SERVICES_DIR}/agents_manager"
+AGENTS_MANAGER_PORT=18002
 
-REDIS_CONTAINER = "redis"
-REDIS_IMAGE = "redis"
-REDIS_IMAGE_VERSION = "latest"
-REDIS_PORT = 6379
+##
+# SERVICE: REDIS
+##
+REDIS_SIMULATOR_CONTAINER="redis_simulator"
+REDIS_SIMULATOR_IMAGE="smart_scaler_redis_simulator"
+REDIS_SIMULATOR_IMAGE_VERSION="1.0.0"
+REDIS_SIMULATOR_DOCKER_PATH="${SERVICES_DIR}/redis_simulator"
+REDIS_SIMULATOR_PORT=18003
+
+##
+# SERVICE: KUBERNETES
+##
+KUBERNETES_SIMULATOR_CONTAINER="kubernetes_simulator"
+KUBERNETES_SIMULATOR_IMAGE="smart_scaler_kubernetes_simulator"
+KUBERNETES_SIMULATOR_IMAGE_VERSION="1.0.0"
+KUBERNETES_SIMULATOR_DOCKER_PATH="${SERVICES_DIR}/kubernetes_simulator"
+KUBERNETES_SIMULATOR_PORT=18004
 
 ##
 # BUILD
 ##
-docker build -t ${API_GATEWAY_IMAGE}:${API_GATEWAY_IMAGE_VERSION}       ${API_GATEWAY_DOCKER_PATH}
-docker build -t ${AGENTS_MANAGER_IMAGE}:${AGENTS_MANAGER_IMAGE_VERSION} ${AGENTS_MANAGER_DOCKER_PATH}
-docker build -t ${REPO_MANAGER_IMAGE}:${REPO_MANAGER_IMAGE_VERSION}     ${REPO_MANAGER_DOCKER_PATH}
+build ${API_GATEWAY_IMAGE}, ${API_GATEWAY_IMAGE_VERSION}, ${API_GATEWAY_DOCKER_PATH}
+build ${AGENTS_MANAGER_IMAGE}, ${AGENTS_MANAGER_IMAGE_VERSION}, ${AGENTS_MANAGER_DOCKER_PATH}
+build ${REDIS_SIMULATOR_IMAGE}, ${REDIS_SIMULATOR_IMAGE_VERSION}, ${REDIS_SIMULATOR_DOCKER_PATH}
+build ${KUBERNETES_SIMULATOR_IMAGE}, ${KUBERNETES_SIMULATOR_IMAGE_VERSION}, ${KUBERNETES_SIMULATOR_DOCKER_PATH}
 
 ##
 # PULL
 ##
-docker pull ${REDIS_IMAGE}:${REDIS_IMAGE_VERSION}
+#pull ${REDIS_IMAGE}:${REDIS_IMAGE_VERSION}
 
 ##
 # RUN
 ##
-docker run --name ${API_GATEWAY_CONTAINER}    -d -p ${API_GATEWAY_PORT}:${API_GATEWAY_PORT}       ${API_GATEWAY_IMAGE}:${API_GATEWAY_IMAGE_VERSION}
-docker run --name ${AGENTS_MANAGER_CONTAINER} -d -p ${AGENTS_MANAGER_PORT}:${AGENTS_MANAGER_PORT} ${AGENTS_MANAGER_IMAGE}:${AGENTS_MANAGER_IMAGE_VERSION}
-docker run --name ${REPO_MANAGER_CONTAINER}   -d -p ${REPO_MANAGER_PORT}:${REPO_MANAGER_PORT}     ${REPO_MANAGER_IMAGE}:${REPO_MANAGER_IMAGE_VERSION}
-docker run --name ${REDIS_CONTAINER}          -d -p ${REDIS_PORT}:${REDIS_PORT}                   ${REDIS_IMAGE}:${REDIS_IMAGE_VERSION}
+run ${API_GATEWAY_IMAGE} ${API_GATEWAY_IMAGE_VERSION} ${API_GATEWAY_CONTAINER} ${API_GATEWAY_PORT}
+
+
+function build () {
+    image=$1
+    version=$2
+    path=$3
+    docker build -t ${image}:${version} ${path}
+}
+
+function pull () {
+    image=$1
+    version=$2
+    docker pull ${image}:${version}
+}
+
+function run () {
+    image=$1
+    version=$2
+    container=$3
+    port=$4
+    docker run ${image}:${version} --name ${container} -d -p ${port}:${port}
+}

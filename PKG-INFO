@@ -1,13 +1,13 @@
 Metadata-Version: 1.1
 Name: Smart Scaler
 Version: 1.0.0
-Summary: A smart scaler for Kubernetes
-Home-page: http://gmarciani.com/portfolio/smart-scaler
+Summary: A smart auto-scaling service for Kubernetes, leveraging Reinforcement Learning
+Home-page: https://gmarciani.github.io/smart-scaler
 Author: Giacomo Marciani
 Author-email: gmarciani@acm.org
 License: MIT
-Download-URL: http://gmarciani.com/workspace/demule/installing.html
-Description: A smart scaler for Kubernetes
+Download-URL: https://gmarciani.github.io/smart-scaler
+Description: A smart auto-scaling service for Kubernetes, leveraging Reinforcement Learning
 
 Platform: any
 Classifier: Development Status :: 5 - Production/Stable

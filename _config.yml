@@ -1,1 +1,8 @@
 theme: jekyll-theme-minimal
+
+title: Smart Scaler
+description: A smart elasticity service for Kubernetes, leveraging Reinforcement Learning.
+
+show_downloads: True
+
+#google_analytics: UA-103582070-1

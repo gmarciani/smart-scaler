@@ -1,57 +1,44 @@
 # Smart Scaler
 
-*A smart scaler for Kubernetes*
+*A smart auto-scaling service for Kubernetes, leveraging Reinforcement Learning*
 
 
 ## Build
-Install all required packages with PIP, running:
+The service is containerized with Docker, running:
 
-    $> pip install -r requirements.txt
+    $> bash docker.sh
 
 
-## Simulations
-Demule provides the user with the following simulation models:
+## Deploy
+The service can be deployed in the following modes:
 
-* cloud: a simulation about Cloud computing
 
-Launch a simulation, running:
-
-    $> python simulation.py [MY_SIMULATION] --config [MY_CONFIGURATION]
+The deloyment can be executed, running:
+    
+    $> bash up.sh [MODE] [SERVICE]
     
 where 
-*[MY_SIMULATION]* is the name of the simulation to launch, i.e. the package name contained in demule.simulations, and
-*[MY_CONFIGURATION]* is the relative path to the YAML configuration file for the simulation.
+*[MODE]* is one of the following deployment modes:
+* local: 
+* kubernetes:
 
-For example, to launch the cloud simulation, run:
+*[SERVICE]* is one of the following microservices:
+* api_gateway
+* agents_manager
+* redis_simulator
+* kubernetes_simulator
 
-    $> python simulation.py cloud --config simulations/cloud/sample.yaml
+For example, to launch the API Gateway locally, run:
 
+    $> bash up.sh local api_gateway
 
-### Configuration
-We state here a sample configuration, that is the one specified by *experiments/cloud/simulation.yaml*:
-
-```yaml
-general:
-  t_stop: 50000
-  replica: 3
-  random:
-    generator: "MarcianiMultiStream"
-    seed: 123456789
-cloudlet:
-  n_servers: 20
-cloud:
-  t_service_rate_1: 0.75
-  t_service_rate_2: 0.85
-  t_setup: 95
-```
 
 ## Authors
 Giacomo Marciani, [gmarciani@acm.org](mailto:gmarciani@acm.org)
 
 
 ## References
-* "Discrete-Event Simulation", 2006, L.M. Leemis, S.K. Park
-* "Performance Modeling and Design of Computer Systems, 2013, M. Harchol-Balter
+* "Smart elasticity for Kubernetes, leveraging reinforcement learning", 2018, G. Marciani
 
 
 ## License
