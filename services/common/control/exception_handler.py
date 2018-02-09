@@ -1,6 +1,6 @@
 from flask import jsonify
-from werkzeug.exceptions import HTTPException
 from datetime import datetime
+from services.common.model.exception import RESTException
 
 
 def handle_exception(exc):
@@ -13,4 +13,4 @@ def handle_exception(exc):
         "ts": datetime.now(),
         "error": str(exc)
     })
-    return response, exc.code if isinstance(exc, HTTPException) else 500
+    return response, exc.code if isinstance(exc, RESTException) else 500

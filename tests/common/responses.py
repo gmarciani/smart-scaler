@@ -32,3 +32,13 @@ def get_json(rv):
     :return: (dict) the JSON data.
     """
     return to_json(rv.get_data(as_text=True))
+
+
+def get_data_field(rv, field):
+    """
+    Retrieve the JSON data from the return values.
+    :param rv: the return value.
+    :param field: the field name.
+    :return: (dict) the field value.
+    """
+    return get_json(rv)[field]

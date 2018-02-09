@@ -40,6 +40,8 @@ class Database(Resource):
             value = data["value"]
         except KeyError:
             raise BadRequest("Cannot find field(s) 'key', 'value'")
+        except TypeError:
+            raise BadRequest("Cannot parse data")
 
         if key in database_ctrl.get_database():
             raise BadRequest("Cannot create key {} because it already exists".format(key))
@@ -90,7 +92,7 @@ class Database(Resource):
 
         database_ctrl.get_database()[key] = value_new
 
-        return dict(key=key, value_new=value_new, value_old=value_old)
+        return dict(key=key, value=value_new, value_old=value_old)
 
     def delete(self):
         """

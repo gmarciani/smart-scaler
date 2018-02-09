@@ -38,7 +38,7 @@ Giacomo Marciani, [gmarciani@acm.org](mailto:gmarciani@acm.org)
 
 
 ## References
-* "Smart elasticity for Kubernetes, leveraging reinforcement learning", 2018, G. Marciani
+* "Smart Elasticity for Kubernetes, leveraging Reinforcement Learning", 2018, G. Marciani
 
 
 ## License

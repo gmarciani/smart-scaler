@@ -1,6 +1,7 @@
 from services.redis_simulator.app import app as app
 from tests.common import responses
 import unittest
+import json
 
 
 class DatabaseTestCase(unittest.TestCase):
@@ -19,27 +20,82 @@ class DatabaseTestCase(unittest.TestCase):
         """
         pass
 
-    def test_retrieval_all(self):
-        """
-        Test the retrieval of all entries.
-        :return:
-        """
-        rv = self.app.get("/database")
-        self.assertTrue(responses.match_status(rv, 200), "HTTP status code mismatch")
-
-        expected = dict(values={})
-        self.assertTrue(responses.match_data(rv, expected), "JSON mismatch")
-
-    def test_creation(self):
+    def test_crud_key(self):
         """
         Test the creation of an entry.
         :return:
         """
+        key = "key_1"
+        value = "val_1"
+
+        # Retrieve all (empty)
         rv = self.app.get("/database")
+        self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
+
+        values_actual = responses.get_data_field(rv, "values")
+        values_expected = dict()
+        self.assertEqual(values_expected, values_actual, "Value mismatch")
+
+        # Create
+        rv = self.app.put("/database", data=json.dumps(dict(key=key, value=value)), content_type="application/json")
+        self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
+
+        expected = dict(key=key, value=value)
+        self.assertTrue(responses.match_data(rv, expected), "JSON mismatch")
+
+        # Create existing
+        rv = self.app.put("/database", data=json.dumps(dict(key=key, value=value)), content_type="application/json")
+        self.assertEqual(400, rv.status_code, "HTTP status code mismatch")
+
+        # Retrieve
+        rv = self.app.get("/database", query_string=dict(key=key))
+        self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
+
+        expected = dict(key=key, value=value)
+        self.assertTrue(responses.match_data(rv, expected), "JSON mismatch")
+
+        # Retrieve all
+        rv = self.app.get("/database")
+        self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
+
+        values_actual = responses.get_data_field(rv, "values")
+        values_expected = {key: value}
+        self.assertEqual(values_expected, values_actual, "Value mismatch")
+
+        # Update
+        value_old = value
+        value = "val_1_new"
+        rv = self.app.patch("/database", data=json.dumps(dict(key=key, value=value)), content_type="application/json")
+        self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
+
+        expected = dict(key=key, value=value, value_old=value_old)
+        self.assertTrue(responses.match_data(rv, expected), "JSON mismatch")
+
+        # Retrieve (updated)
+        rv = self.app.get("/database", query_string=dict(key=key))
         self.assertTrue(responses.match_status(rv, 200), "HTTP status code mismatch")
 
-        expected = dict(values={})
+        expected = dict(key=key, value=value)
         self.assertTrue(responses.match_data(rv, expected), "JSON mismatch")
+
+        # Delete existing
+        rv = self.app.delete("/database", data=json.dumps(dict(key=key)), content_type="application/json")
+        self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
+
+        expected = dict(key=key, value=value)
+        self.assertTrue(responses.match_data(rv, expected), "JSON mismatch")
+
+        # Update non existing
+        rv = self.app.patch("/database", data=json.dumps(dict(key=key, value=value)), content_type="application/json")
+        self.assertEqual(404, rv.status_code, "HTTP status code mismatch")
+
+        # Retrieve non existing
+        rv = self.app.get("/database", query_string=dict(key=key))
+        self.assertEqual(404, rv.status_code, "HTTP status code mismatch")
+
+        # Delete non existing
+        rv = self.app.delete("/database", data=json.dumps(dict(key=key)), content_type="application/json")
+        self.assertEqual(404, rv.status_code, "HTTP status code mismatch")
 
 
 if __name__ == "__main__":

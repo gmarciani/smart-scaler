@@ -33,10 +33,10 @@ class WebApp(Flask):
         self.api.representations = OrderedDict(REPRESENTATIONS)
 
         # Error Handling
-        if not self.config["DEBUG"]:
-            for exc in default_exceptions:
-                self.register_error_handler(exc, error_ctrl.handle_exception)
-            self.register_error_handler(Exception, error_ctrl.handle_exception)
+        #if not self.config["DEBUG"]:
+        for exc in default_exceptions:
+            self.register_error_handler(exc, error_ctrl.handle_exception)
+        self.register_error_handler(Exception, error_ctrl.handle_exception)
 
         # Logging
         logging.basicConfig(level=logging._nameToLevel[self.config["LOG_LEVEL"]], format=FORMAT)
