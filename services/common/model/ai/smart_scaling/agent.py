@@ -1,8 +1,9 @@
-from qlearning import SimpleQLearningAgent as QLearningAgent
-from smart_scaling import states
-from smart_scaling import actions_utils
-from smart_scaling import rewarding
-from smart_scaling import SimpleScalingAction as ScalingAction
+from services.common.model.resources.smart_scaler import SmartScalerResource as SmartScalerResource
+from services.common.model.ai.qlearning.agent import SimpleQLearningAgent as QLearningAgent
+from services.common.model.ai.smart_scaling.actions import SimpleScalingAction as ScalingAction
+from services.common.model.ai.smart_scaling import states
+from services.common.model.ai.smart_scaling import actions_utils
+from services.common.model.ai.smart_scaling import rewarding
 from services.common.util import mathutil
 import random
 import logging
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class SmartScaler:
     """
-    A Smart Scaler, leveragin QLearning.
+    A Smart Scaler, leveraging QLearning.
     """
 
     def __init__(self, name, pod_name, min_replicas, max_replicas, agent):
@@ -26,12 +27,8 @@ class SmartScaler:
         :param max_replicas: (integer) the maximum replication degree.
         :param agent: (SimpleQLearningAgent) the QLearning agent.
         """
-        self.name = name
-        self.pod_name = pod_name
-        self.min_replicas = min_replicas
-        self.max_replicas = max_replicas
+        self.resource = SmartScalerResource(name, pod_name, min_replicas, max_replicas)
         self.agent = agent
-
         self.last_state = None
         self.last_action = None
 

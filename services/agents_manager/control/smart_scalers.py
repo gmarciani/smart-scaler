@@ -1,7 +1,5 @@
-from common.control import kubernetes as kubernetes_ctrl
-from smart_scaling import SmartScaler
-from services.common.exceptions.kubernetes_exception import KubernetesException
-from services.common.exceptions.repo_manager_exception import RepositoryManagerException
+from services.common.control import kubernetes as kubernetes_ctrl
+from services.common.model.ai.smart_scaling.agent import SmartScaler
 import logging
 
 
@@ -9,28 +7,71 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def get_all_smart_scalers(kubernetes_conn):
+def update_registry(agents, kubernetes_conn, repository_conn):
     """
-    Get all Smart Scalers for the specified agents manager.
-    :param kubernetes_conn: (SimpleConnection) the Kubernetes connection.
-    :return: (list) the list of Smart Scalers for the specified agents manager.
+    Update the agents registry pulling currently active Smart Scalers on Kubernetes.
+    :param agents: (dict) the repository of agents ({smart_scaler_name: agent}).
+    :param kubernetes_conn: (SimpleConnection) the connection to Kubernetes.
+    :param repository_conn: (SimpleConnection) the connection to the repository.
+    :return: None
     """
     smart_scalers_all = kubernetes_ctrl.get_all_smart_scalers(kubernetes_conn)
-    return smart_scalers_all
+
+    smart_scalers_to_remove = list(set(map(lambda x: x.name, agents)) - set(map(lambda x: x.name, smart_scalers_all)))
+
+    smart_scalers_to_add = list(filter(lambda x: x.name not in agents, smart_scalers_all))
+
+    logger.debug("Smart Scaler(s) ALL: {}".format(smart_scalers_all))
+    logger.debug("Smart Scaler(s) to remove: {}".format(smart_scalers_to_remove))
+    logger.debug("Smart Scaler(s) to add: {}".format(smart_scalers_to_add))
+
+    for smart_scaler in smart_scalers_to_remove:
+        delete_local_smart_scaler(agents, smart_scaler)
+
+    for smart_scaler in smart_scalers_to_add:
+        add_local_smart_scaler(agents, smart_scaler, repository_conn)
 
 
-def add_local_smart_scaler(smart_scaler, kubernetes_conn, repo_manager_conn, agents):
+def apply_scaling(agent, kubernetes_conn):
+    """
+    Apply scaling actions provided by agents.
+    :param agents: the smart scaler agent.
+    :param kubernetes_conn: (SimpleConnection) the connection to Kubernetes.
+    :return: None
+    """
+    pod_name = agent.pod_name
+
+    pod = kubernetes_ctrl.get_pod(kubernetes_conn, pod_name)
+
+    curr_state = agent.map_state(pod.replicas, pod.cpu_utilization)
+
+    new_replicas = agent.get_replicas(curr_state)
+
+    kubernetes_ctrl.set_pod_replicas(kubernetes_conn, pod_name, new_replicas)
+
+
+def backup_agent(agent, repository_conn):
+    """
+    Apply scaling actions provided by agents.
+    :param agent: the smart scaler agent.
+    :param repository_conn: (SimpleConnection) the connection to the repository.
+    :return: None
+    """
+    pass
+
+
+def add_local_smart_scaler(smart_scaler, kubernetes_conn, repository_conn, agents):
     """
     Add a Smart Scaler, locally.
     :param smart_scaler_name: (string) the Smart Scaler name.
-    :param kubernetes_conn: (SimpleConnection) the Kubernetes connection.
-    :param repo_manager_conn: (SimpleConnection) the Kubernetes connection.
+    :param kubernetes_conn: (SimpleConnection) the connection to Kubernetes.
+    :param repository_conn: (SimpleConnection) the connection to the repository.
     :param agents: (dict) the repository of agents ({smart_scaler_name: agent}).
     :return: (void)
     """
     agent_new = SmartScaler(
         kubernetes_conn,
-        repo_manager_conn,
+        repository_conn,
         smart_scaler["name"],
         smart_scaler["pod_name"],
         smart_scaler["min_replicas"] | 1,
@@ -64,11 +105,11 @@ def add_local_smart_scaler(smart_scaler, kubernetes_conn, repo_manager_conn, age
         logger.debug("Added Smart Scaler {}".format(agent_new))
 
 
-def delete_local_smart_scaler(smart_scaler_name, agents):
+def delete_local_smart_scaler(agents, smart_scaler_name):
     """
     Delete a Smart Scaler, locally.
-    :param smart_scaler_name: (string) the Smart Scaler name.
     :param agents: (dict) the repository of agents ({smart_scaler_name: agent}).
+    :param smart_scaler_name: (string) the Smart Scaler name.
     :return: (void)
     """
     agent = agents[smart_scaler_name]
@@ -93,3 +134,9 @@ def delete_local_smart_scaler(smart_scaler_name, agents):
     if removed:
         del agents[agent.name]
         logger.debug("Removed Smart Scaler {}".format(agent.name))
+
+
+def backup_smart_scaler(agent, repository_conn):
+    pass
+
+

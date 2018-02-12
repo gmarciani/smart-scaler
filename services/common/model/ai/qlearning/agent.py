@@ -1,4 +1,4 @@
-from qlearning import rewarding
+from services.common.model.ai.qlearning import rewarding
 from services.common.util import formatutil
 import random
 import itertools

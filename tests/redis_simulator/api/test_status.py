@@ -28,7 +28,7 @@ class StatusTestCase(unittest.TestCase):
         self.assertTrue(responses.match_status(rv, 200), "HTTP status code mismatch")
 
         expected = dict(status="OK")
-        self.assertTrue(responses.match_data(rv, expected), "JSON mismatch")
+        self.assertDictEqual(expected, responses.get_json(rv), "JSON mismatch")
 
 
 if __name__ == "__main__":

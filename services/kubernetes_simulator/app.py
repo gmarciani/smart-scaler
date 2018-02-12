@@ -1,8 +1,9 @@
-from services.common.environment.webapp import WebApp as App
+from services.common.model.environment.webapp import WebApp as App
 from services.common.control import shutdown as shutdown_ctrl
 from services.kubernetes_simulator.config import Debug as AppConfig
 from services.kubernetes_simulator.api.status import Status
-from services.kubernetes_simulator.api.registry import Pods, SmartScalers
+from services.kubernetes_simulator.api.registry_pods import Pods
+from services.kubernetes_simulator.api.registry_smart_scalers import SmartScalers
 from services.kubernetes_simulator.api.heapster import PodMetrics
 from services.kubernetes_simulator.control import heapster as heapster_ctrl
 from services.kubernetes_simulator.control import registry as registry_ctrl
@@ -26,4 +27,4 @@ app.add_shutdown_hook(shutdown_ctrl.goodbye)
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=app.config["KUBERNETES_PORT"], threaded=True)
+    app.start(port=app.config["KUBERNETES_PORT"])

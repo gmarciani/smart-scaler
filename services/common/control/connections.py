@@ -1,4 +1,4 @@
-from flask import current_app, g
+from flask import current_app
 from services.common.model.connection import SimpleConnection
 
 
@@ -37,41 +37,19 @@ def format_url(rest_interface, connection, protocol="http"):
     return "{}://{}:{}/{}".format(protocol, connection.host, connection.port, rest_interface)
 
 
-def get_service_connection(service_name, app_config=None):
+def get_service_connection(service_name):
     """
     Get the connection to the specified service.
     :param service_name: (string) the service name.
-    :param app_config: (dict) the Flask app configuration.
     :return: (SimpleConnection) the connection to the service.
     """
-    if app_config is not None:
-        host = app_config[SERVICES_MAP[service_name]["config_host"]]
-        port = app_config[SERVICES_MAP[service_name]["config_port"]]
-        return SimpleConnection(host, port)
-    else:
-        attr_name = SERVICES_MAP[service_name]["attr_name"]
-        if not hasattr(g, attr_name):
-            host = current_app.config[SERVICES_MAP[service_name]["config_host"]]
-            port = current_app.config[SERVICES_MAP[service_name]["config_port"]]
-            conn = SimpleConnection(host, port)
-            setattr(g, attr_name, conn)
-        return getattr(g, attr_name)
+    attr_name = SERVICES_MAP[service_name]["attr_name"]
 
-
-def open_repository_connection():
-    """
-    Open the connection to the repository.
-    :return: (SimpleConnection) the connection to the repository.
-    """
-    if not hasattr(g, "repository_conn"):
-        g.repository_conn = SimpleConnection(current_app.config["REDIS_HOST"], current_app.config["REDIS_PORT"])
-    return g.repository_conn
-
-
-def close_repository_connection():
-    """
-    Close the connection to the repository.
-    :return: (void)
-    """
-    if hasattr(g, "repo_conn"):
-        g.repository_conn = None
+    try:
+        conn = SERVICES_MAP[service_name][attr_name]
+    except KeyError:
+        host = current_app.config[SERVICES_MAP[service_name]["config_host"]]
+        port = current_app.config[SERVICES_MAP[service_name]["config_port"]]
+        conn = SimpleConnection(host, port)
+        SERVICES_MAP[service_name][attr_name] = conn
+    return conn

@@ -1,9 +1,9 @@
-from common.exceptions.service_exception import ServiceException
+from services.common.model.exceptions.service_exception import ServiceException
 
 
-class KubernetesException(ServiceException):
+class RepositoryException(ServiceException):
     """
-    Exception raised for errors in Kubernetes.
+    Exception raised for errors in RepoManager.
     """
 
     def __init__(self, code, message):

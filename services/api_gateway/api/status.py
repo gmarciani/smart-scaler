@@ -1,4 +1,3 @@
-from flask import current_app
 from flask_restful import Resource
 from services.common.control import status as status_ctrl
 
@@ -16,4 +15,4 @@ class Status(Resource):
         Get the status of the service.
         :return: the status of the service.
         """
-        return status_ctrl.compose_status_respose(status_ctrl.get_statuses(SERVICES, current_app.config))
+        return status_ctrl.compose_status_respose(status_ctrl.get_statuses(SERVICES))

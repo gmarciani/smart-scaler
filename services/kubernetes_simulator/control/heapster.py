@@ -1,5 +1,7 @@
-from flask import g
 from services.kubernetes_simulator.model.heapster import SimpleKubernetesHeapster as KubernetesHeapster
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 HEAPSTER = KubernetesHeapster()
@@ -10,6 +12,7 @@ def get_heapster():
     Retrieve Kubernetes Heapster.
     :return: (dict) Kubernetes Heapster.
     """
+    #logger.debug("Getting Heapster")
     return HEAPSTER
     #heapster = getattr(g, "_heapster", None)
     #if heapster is None:
@@ -23,6 +26,7 @@ def teardown_heapster(exc):
     :param exc: the exception passed by the middleware during teardown process.
     :return: None
     """
+    #logger.debug("Tearing down Heapster")
     pass
     #heapster = getattr(g, "_heapster", None)
     #if heapster is not None:

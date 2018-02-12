@@ -1,32 +1,23 @@
 import requests
 import json
+
+from services.common.model.exceptions.kubernetes_exception import KubernetesException
+from services.common.model.resources.smart_scaler import SmartScalerResource
+from services.common.model.resources.pod import PodResource
 from services.common.control import connections as conn_ctrl
-from services.common.exceptions.kubernetes_exception import KubernetesException
+import logging
 
 
-def get_state(kubernetes_conn):
-    """
-    Get the status of Kubernetes cluster.
-    :param kubernetes_conn: (SimpleConnection) the Kubernetes connection.
-    :return: (dict) the Kubernetes status.
-    """
-    url = conn_ctrl.format_url("status", kubernetes_conn)
-
-    try:
-        response = requests.get(url)
-        response_json = response.json()
-    except requests.ConnectionError:
-        return {"kube_state": "KUBERNETES UNREACHABLE"}
-    return response_json
+logger = logging.getLogger(__name__)
 
 
 def get_all_smart_scalers(kubernetes_conn):
     """
-    Get the list of Smart Scalers.
-    :param kubernetes_conn: (SimpleConnection) the Kubernetes connection.
-    :return: (list) the list of Smart Scalers.
+    Get the list of smart scalers.
+    :param kubernetes_conn: (SimpleConnection) the connection to Kubernetes.
+    :return: (list) the list of smart scalers.
     """
-    url = conn_ctrl.format_url("smart_scalers", kubernetes_conn)
+    url = conn_ctrl.format_url("registry/smart_scalers", kubernetes_conn)
 
     try:
         response = requests.get(url)
@@ -37,16 +28,24 @@ def get_all_smart_scalers(kubernetes_conn):
     if response.status_code is not 200:
         raise KubernetesException(response.status_code, response_json["error"])
 
-    return response_json["smart_scalers"]
+    smart_scalers = []
+
+    for s in response_json["smart_scalers"]:
+        try:
+            smart_scalers.append(SmartScalerResource.from_json(s))
+        except Exception:
+            logger.error("Cannot parse smart scaler {}".format(s))
+
+    return smart_scalers
 
 
-def get_all_kube_pods(kubernetes_conn):
+def get_all_pods(kubernetes_conn):
     """
     Get the list of Pods.
     :param kubernetes_conn: (SimpleConnection) the Kubernetes connection.
     :return: (list) the list of Pods.
     """
-    url = conn_ctrl.format_url("pods", kubernetes_conn)
+    url = conn_ctrl.format_url("registry/pods", kubernetes_conn)
 
     try:
         response = requests.get(url)
@@ -57,17 +56,25 @@ def get_all_kube_pods(kubernetes_conn):
     if response.status_code is not 200:
         raise KubernetesException(response.status_code, response_json["error"])
 
-    return response_json["pods"]
+    pods = []
+
+    for s in response_json["pods"]:
+        try:
+            pods.append(PodResource.from_json(s))
+        except Exception:
+            logger.error("Cannot parse pod {}".format(s))
+
+    return pods
 
 
-def get_pod_status(kubernetes_conn, pod_name):
+def get_pod(kubernetes_conn, pod_name):
     """
     Get the status of the specified Pod.
     :param kubernetes_conn: (SimpleConnection) the Kubernetes connection.
     :param pod_name: (string) the Pod name.
-    :return: (dict) the status of the specified Pod.
+    :return: (Pod) the pod.
     """
-    url = conn_ctrl.format_url("pods/status", kubernetes_conn)
+    url = conn_ctrl.format_url("registry/pods", kubernetes_conn)
 
     data = {
         "name": pod_name
@@ -82,7 +89,13 @@ def get_pod_status(kubernetes_conn, pod_name):
     if response.status_code is not 200:
         raise KubernetesException(response.status_code, response_json["error"])
 
-    return response_json["status"]
+    s = response_json["pod"]
+    try:
+        pod = PodResource.from_json(s)
+    except Exception:
+        logger.error("Cannot parse pod {}".format(s))
+
+    return pod
 
 
 def set_pod_replicas(kubernetes_conn, pod_name, replicas):
@@ -93,12 +106,12 @@ def set_pod_replicas(kubernetes_conn, pod_name, replicas):
     :param replicas: (int) the Pod replication degree.
     :return: (tuple(integer,integer)) the old and new replication degree.
     """
-    url = conn_ctrl.format_url("pods/scale", kubernetes_conn)
+    url = conn_ctrl.format_url("registry/pods", kubernetes_conn)
 
     data = {"name": pod_name, "replicas": replicas}
 
     try:
-        response = requests.post(url, json=data)
+        response = requests.patch(url, json=data)
         response_json = response.json()
     except (requests.ConnectionError, json.JSONDecodeError) as exc:
         raise KubernetesException(500, "set_pod_replicas: " + str(exc))

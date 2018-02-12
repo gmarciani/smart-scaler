@@ -20,7 +20,10 @@ def match_data(rv, expected_data):
     :param expected_data: the expected data
     :return: True, in case of a data match; False, otherwise.
     """
-    actual_data = get_json(rv)
+    actual_data = dict(get_json(rv))
+    print("actual_data: ", actual_data)
+    print("actual_items: ", list(actual_data.items()))
+    print("expected_items: ", list(expected_data.items()))
     match_condition = all(item in actual_data.items() for item in expected_data.items())
     return match_condition
 

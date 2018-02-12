@@ -4,11 +4,10 @@ from datetime import datetime
 from services.common.control import connections as conn_ctrl
 
 
-def get_statuses(services, config):
+def get_statuses(services):
     """
     Get the report of services status.
     :param services: (list) list of services names.
-    :param config: (dict) the current app configuration.
     :return: (dict) a dictionary {service_name: status}.
     """
     return dict([(service, get_status_service(conn_ctrl.get_service_connection(service))) for service in services])
