@@ -65,8 +65,6 @@ class RegistrySmartScalersTestCase(unittest.TestCase):
         self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
 
         expected = dict(smart_scaler=smart_scaler.to_json())
-        print(expected)
-        print(responses.get_json(rv))
         self.assertDictEqual(expected, responses.get_json(rv), "JSON mismatch")
 
         # Create existing

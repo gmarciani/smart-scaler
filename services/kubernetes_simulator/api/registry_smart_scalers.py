@@ -66,8 +66,8 @@ class SmartScalers(Resource):
         except KeyError:
             ai_params = {}
 
-        smart_scaler_new = SmartScalerResource(smart_scaler_name, pod_name, min_replicas, max_replicas, ai_technique)
-        smart_scaler_new.ai_params = ai_params
+        smart_scaler_new = SmartScalerResource(smart_scaler_name, pod_name, min_replicas, max_replicas, ai_technique, **ai_params)
+        #smart_scaler_new.ai_params = ai_params
         registry_ctrl.get_registry().get_smart_scalers()[smart_scaler_name] = smart_scaler_new
 
         return dict(smart_scaler=smart_scaler_new)
