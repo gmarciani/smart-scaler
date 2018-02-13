@@ -50,46 +50,48 @@ class RegistrySmartScalersTestCase(unittest.TestCase):
         self.assertDictEqual(expected, responses.get_json(rv), "JSON mismatch")
 
         # Create (not existing pod)
-        rv = self.app.put("/registry/smart_scalers", data=to_json(smart_scaler), content_type="application/json")
+        rv = self.app.put("/registry/smart_scalers", data=smart_scaler.to_jsons(), content_type="application/json")
         self.assertEqual(400, rv.status_code, "HTTP status code mismatch")
 
         # Create pod
-        rv = self.app.put("/registry/pods", data=to_json(pod), content_type="application/json")
+        rv = self.app.put("/registry/pods", data=pod.to_jsons(), content_type="application/json")
         self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
 
-        expected = dict(pod=vars(pod))
+        expected = dict(pod=pod.to_json())
         self.assertDictEqual(expected, responses.get_json(rv), "JSON mismatch")
 
         # Create
-        rv = self.app.put("/registry/smart_scalers", data=to_json(smart_scaler), content_type="application/json")
+        rv = self.app.put("/registry/smart_scalers", data=smart_scaler.to_jsons(), content_type="application/json")
         self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
 
-        expected = dict(smart_scaler=vars(smart_scaler))
+        expected = dict(smart_scaler=smart_scaler.to_json())
+        print(expected)
+        print(responses.get_json(rv))
         self.assertDictEqual(expected, responses.get_json(rv), "JSON mismatch")
 
         # Create existing
-        rv = self.app.put("/registry/smart_scalers", data=to_json(smart_scaler), content_type="application/json")
+        rv = self.app.put("/registry/smart_scalers", data=smart_scaler.to_jsons(), content_type="application/json")
         self.assertEqual(400, rv.status_code, "HTTP status code mismatch")
 
         # Retrieve
         rv = self.app.get("/registry/smart_scalers", query_string=dict(name=smart_scaler.name))
         self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
 
-        expected = dict(smart_scaler=vars(smart_scaler))
+        expected = dict(smart_scaler=smart_scaler.to_json())
         self.assertDictEqual(expected, responses.get_json(rv), "JSON mismatch")
 
         # Retrieve all
         rv = self.app.get("/registry/smart_scalers")
         self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
 
-        expected = dict(smart_scalers=[vars(smart_scaler)])
+        expected = dict(smart_scalers=[smart_scaler.to_json()])
         self.assertDictEqual(expected, responses.get_json(rv), "JSON mismatch")
 
         # Delete existing
         rv = self.app.delete("/registry/smart_scalers", data=to_json(dict(name=smart_scaler.name)), content_type="application/json")
         self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
 
-        expected = dict(smart_scaler=vars(smart_scaler))
+        expected = dict(smart_scaler=smart_scaler.to_json())
         self.assertDictEqual(expected, responses.get_json(rv), "JSON mismatch")
 
         # Retrieve non existing

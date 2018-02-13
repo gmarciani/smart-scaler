@@ -42,11 +42,11 @@ class SmartScalers(Resource):
         try:
             smart_scaler_name = data["name"]
             pod_name = data["pod_name"]
+            min_replicas = data["min_replicas"]
+            max_replicas = data["max_replicas"]
+            ai_technique = data["ai_technique"]
         except KeyError:
-            raise BadRequest("Cannot find field(s) 'name', 'pod_name'")
-
-        smart_scaler_min_replicas = int(data["min_replicas"]) if "min_replicas" in data else 1
-        smart_scaler_max_replicas = int(data["max_replicas"]) if "max_replicas" in data else float("inf")
+            raise BadRequest("Cannot find field(s) 'name', 'pod_name', 'min_replicas', 'max_replicas', 'ai_technique'")
 
         if smart_scaler_name in registry_ctrl.get_registry().get_smart_scalers():
             raise BadRequest("Cannot create smart scaler {} because it already exists".format(smart_scaler_name))
@@ -61,8 +61,13 @@ class SmartScalers(Resource):
                 "Cannot create smart scaler {} because pod {} has been already associated to another smart scaler".format(
                     smart_scaler_name, pod_name))
 
-        smart_scaler_new = SmartScalerResource(smart_scaler_name, pod_name, smart_scaler_min_replicas,
-                                               smart_scaler_max_replicas)
+        try:
+            ai_params = data["ai_params"]
+        except KeyError:
+            ai_params = {}
+
+        smart_scaler_new = SmartScalerResource(smart_scaler_name, pod_name, min_replicas, max_replicas, ai_technique)
+        smart_scaler_new.ai_params = ai_params
         registry_ctrl.get_registry().get_smart_scalers()[smart_scaler_name] = smart_scaler_new
 
         return dict(smart_scaler=smart_scaler_new)

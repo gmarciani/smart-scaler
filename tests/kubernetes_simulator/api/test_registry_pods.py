@@ -37,57 +37,57 @@ class RegistryPodsTestCase(unittest.TestCase):
         self.assertDictEqual(expected, responses.get_json(rv), "JSON mismatch")
 
         # Create
-        rv = self.app.put("/registry/pods", data=to_json(pod), content_type="application/json")
+        rv = self.app.put("/registry/pods", data=pod.to_jsons(), content_type="application/json")
         self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
 
-        expected = dict(pod=vars(pod))
+        expected = dict(pod=pod.to_json())
         self.assertDictEqual(expected, responses.get_json(rv), "JSON mismatch")
 
         # Create existing
-        rv = self.app.put("/registry/pods", data=to_json(pod), content_type="application/json")
+        rv = self.app.put("/registry/pods", data=pod.to_jsons(), content_type="application/json")
         self.assertEqual(400, rv.status_code, "HTTP status code mismatch")
 
         # Retrieve
         rv = self.app.get("/registry/pods", query_string=dict(name=pod.name))
         self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
 
-        expected = dict(pod=vars(pod))
+        expected = dict(pod=pod.to_json())
         self.assertDictEqual(expected, responses.get_json(rv), "JSON mismatch")
 
         # Retrieve all
         rv = self.app.get("/registry/pods")
         self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
 
-        expected = dict(pods=[vars(pod)])
+        expected = dict(pods=[pod.to_json()])
         self.assertDictEqual(expected, responses.get_json(rv), "JSON mismatch")
 
         # Update
         pod_old = deepcopy(pod)
         pod = PodResource(pod.name, pod.replicas * 2)
-        rv = self.app.patch("/registry/pods", data=to_json(pod), content_type="application/json")
+        rv = self.app.patch("/registry/pods", data=pod.to_jsons(), content_type="application/json")
         self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
 
-        expected = dict(pod=vars(pod), pod_old=vars(pod_old))
+        expected = dict(pod=pod.to_json(), pod_old=pod_old.to_json())
         self.assertDictEqual(expected, responses.get_json(rv), "JSON mismatch")
 
         # Retrieve (updated)
         rv = self.app.get("/registry/pods", query_string=dict(name=pod.name))
         self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
 
-        expected = dict(pod=vars(pod))
+        expected = dict(pod=pod.to_json())
         self.assertDictEqual(expected, responses.get_json(rv), "JSON mismatch")
 
         # Delete existing
         rv = self.app.delete("/registry/pods", data=to_json(dict(name=pod.name)), content_type="application/json")
         self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
 
-        expected = dict(pod=vars(pod), smart_scalers=None)
+        expected = dict(pod=pod.to_json(), smart_scalers=None)
         self.assertDictEqual(expected, responses.get_json(rv), "JSON mismatch")
 
         # Update non existing
         pod_old = deepcopy(pod)
         pod = PodResource(pod.name, pod.replicas * 2)
-        rv = self.app.patch("/registry/pods", data=to_json(pod), content_type="application/json")
+        rv = self.app.patch("/registry/pods", data=pod.to_jsons(), content_type="application/json")
         self.assertEqual(404, rv.status_code, "HTTP status code mismatch")
 
         # Retrieve non existing
