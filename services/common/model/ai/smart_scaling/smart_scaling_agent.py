@@ -1,10 +1,10 @@
-from services.common.model.resources.smart_scaler import SmartScalerResource as SmartScalerResource
 import pickle
+
+from services.common.model.ai.qlearning.qlearning_agent import QLearningAgent
 from services.common.util import mathutil
-from services.common.util.json import SimpleJSONEncoder as JSONEncoder
+from services.common.util.jsonutil import SimpleJSONEncoder as JSONEncoder
 from json import dumps as json_dumps
 from json import loads as json_loads
-from sys import maxsize as maxint
 import logging
 
 
@@ -12,22 +12,22 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class SmartScaler:
+class SmartScalerQLearning:
     """
-    A smart scaler, leveraging QLearning.
+    The base class for a smart scaler that leverage Q-Learning.
     """
 
-    def __init__(self, name=None, pod_name=None, min_replicas=0, max_replicas=maxint, agent=None):
+    def __init__(self, **kwargs):
         """
-        Create a new Reinforcement Learning agent.
-        :param name: (string) the Smart Scaler name (Default: None).
-        :param pod_name: (string) the Pod name (Default: None).
-        :param min_replicas: (integer) the minimum replication degree (Default: 0).
-        :param max_replicas: (integer) the maximum replication degree (Default: maxint).
-        :param agent: (SimpleQLearningAgent) the QLearning agent.
+        Create a new smart scaler.
+        :param resource: (SmartScalerResource) the resource.
         """
-        self.resource = SmartScalerResource(name, pod_name, min_replicas, max_replicas)
-        self.agent = agent
+        self.resource = resource
+        self.agent = QLearningAgent(
+            states=states.ReplicationUtilizationSpace(min_replicas, max_replicas, granularity, round),
+            actions=actions_utils.generate_action_space(ScalingAction),
+            alpha=alpha, gamma=gamma, epsilon=epsilon,
+            rewarding_function=rewarding_function)
 
     def map_state(self, replicas, utilization):
         """
@@ -94,7 +94,7 @@ class SmartScaler:
         :param other: (SmartScaler) the other instance.
         :return: True, if equality is satisfied; False, otherwise.
         """
-        if not isinstance(other, SmartScaler):
+        if not isinstance(other, SmartScalerQLearning):
             return False
         return self.__dict__ == other.__dict__
 
@@ -142,7 +142,7 @@ class SmartScaler:
         :param json: (string) the JSON string to parse.
         :return: (SmartScaler) the parsed pod.
         """
-        return SmartScaler.from_json(json_loads(json))
+        return SmartScalerQLearning.from_json(json_loads(json))
 
     @staticmethod
     def from_json(json):
@@ -151,7 +151,7 @@ class SmartScaler:
         :param json: (JSONObject) the JSON object to parse.
         :return: (SmartScaler) the parsed pod.
         """
-        smart_scaler = SmartScaler()
+        smart_scaler = SmartScalerQLearning()
         for attr_name, attr_value in json.items():
             setattr(smart_scaler, attr_name, attr_value)
         return smart_scaler

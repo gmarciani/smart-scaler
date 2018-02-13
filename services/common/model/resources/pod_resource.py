@@ -1,4 +1,4 @@
-from services.common.util.json import SimpleJSONEncoder as JSONEncoder
+from services.common.util.jsonutil import AdvancedJSONEncoder as JSONEncoder
 from json import dumps as json_dumps
 from json import loads as json_loads
 
@@ -42,6 +42,13 @@ class PodResource:
         :return: (string) the representation.
         """
         return self.__dict__.__str__()
+
+    def to_json(self):
+        """
+        Return the JSON object representation.
+        :return: the JSON object representation.
+        """
+        return vars(self)
 
     def to_jsons(self):
         """

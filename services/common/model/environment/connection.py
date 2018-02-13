@@ -1,4 +1,7 @@
 class SimpleConnection:
+    """
+    A simple connection, made of a host address and port.
+    """
 
     def __init__(self, host, port):
         """

@@ -1,4 +1,4 @@
-from services.common.model.resources.pod import PodResource
+from services.common.model.resources.pod_resource import PodResource
 from services.kubernetes_simulator.app import app as app
 from tests.test_utils import responses
 from tests.test_utils.requests import to_json as to_json
@@ -27,7 +27,7 @@ class RegistryPodsTestCase(unittest.TestCase):
         Test the CRUD of pods.
         :return:
         """
-        pod = PodResource("my-pod-1")
+        pod = PodResource("pod-1")
 
         # Retrieve all (empty)
         rv = self.app.get("/registry/pods")

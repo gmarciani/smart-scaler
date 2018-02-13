@@ -1,6 +1,6 @@
 from flask import jsonify
 from datetime import datetime
-from services.common.model.exception import RESTException
+from services.common.model.exceptions.rest_exceptions import RESTException
 
 
 def handle_exception(exc):

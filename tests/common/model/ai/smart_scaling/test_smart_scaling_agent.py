@@ -1,6 +1,7 @@
-from services.common.model.resources.pod import PodResource
-from services.common.model.ai.smart_scaling.agent import SmartScaler
-from services.common.model.ai.qlearning.agent import SimpleQLearningAgent as QLearningAgent
+from services.common.model.resources.smart_scaler_resource import SmartScalerResource
+from services.common.model.resources.pod_resource import PodResource
+from services.common.model.ai.smart_scaling.smart_scaling_agent import SmartScalerQLearning
+from services.common.model.ai.qlearning.qlearning_agent import QLearningAgent as QLearningAgent
 from services.common.model.ai.smart_scaling import rewarding as rewarding_functions
 from services.common.model.ai.smart_scaling.actions import SimpleScalingAction as ScalingAction
 from services.common.model.ai.smart_scaling import actions_utils
@@ -33,9 +34,9 @@ class SmartScalingAgentTestCase(unittest.TestCase):
         print("States: ", agent.states)
         print("Actions: ", agent.actions)
 
-        scaler = SmartScaler(name, podname, min_replicas, max_replicas, agent)
+        scaler = SmartScalerQLearning(name, podname, min_replicas, max_replicas, agent)
 
-        actual = SmartScaler.from_binarys(scaler.to_binarys())
+        actual = SmartScalerQLearning.from_binarys(scaler.to_binarys())
         expected = scaler
         self.assertEqual(expected, actual, "Binary serialization error")
 
@@ -53,7 +54,7 @@ class SmartScalingAgentTestCase(unittest.TestCase):
 
             scaler.save_experience(curr_state, action)
 
-        actual = SmartScaler.from_binarys(scaler.to_binarys())
+        actual = SmartScalerQLearning.from_binarys(scaler.to_binarys())
         expected = scaler
         self.assertEqual(expected, actual, "Binary serialization error")
 
@@ -76,13 +77,20 @@ class SmartScalingAgentTestCase(unittest.TestCase):
 
             iterations = 100
 
+            resource = SmartScalerResource(
+                name="ss_my_pod",
+                pod_name="my_pod",
+                min_replicas=1,
+                max_replicas=5
+            )
+
             agent = QLearningAgent(
                 states=states.ReplicationUtilizationSpace(min_replicas, max_replicas, granularity, round),
                 actions=actions_utils.generate_action_space(ScalingAction),
                 alpha=alpha, gamma=gamma, epsilon=epsilon,
                 rewarding_function=rewarding_function)
 
-            scaler = SmartScaler(name, podname, min_replicas, max_replicas, agent)
+            scaler = SmartScalerQLearning(resource, agent)
 
             pod = PodResource(podname, min_replicas)
 

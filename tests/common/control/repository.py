@@ -1,4 +1,4 @@
-from services.common.model.connection import SimpleConnection
+from services.common.model.environment.connection import SimpleConnection
 from services.redis_simulator.app import app as app
 import unittest
 

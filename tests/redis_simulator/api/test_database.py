@@ -36,14 +36,14 @@ class DatabaseTestCase(unittest.TestCase):
         values_expected = dict()
         self.assertEqual(values_expected, values_actual, "Value mismatch")
 
-        # Create
-        rv = self.app.post("/database", data=json.dumps(dict(key=key, value=value)), content_type="application/json")
+        # Create unique (not existing)
+        rv = self.app.post("/database", data=json.dumps(dict(key=key, value=value, unique=True)), content_type="application/json")
         self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
 
         expected = dict(key=key, value=value, value_old=None)
         self.assertDictEqual(expected, responses.get_json(rv), "JSON mismatch")
 
-        # Create existing
+        # Create unique (existing)
         rv = self.app.post("/database", data=json.dumps(dict(key=key, value=value, unique=True)), content_type="application/json")
         self.assertEqual(400, rv.status_code, "HTTP status code mismatch")
 
@@ -61,10 +61,10 @@ class DatabaseTestCase(unittest.TestCase):
         expected = dict(values={key: value})
         self.assertDictEqual(expected, responses.get_json(rv), "JSON mismatch")
 
-        # Update
+        # Update (existing)
         value_old = value
         value = "val_1_new"
-        rv = self.app.patch("/database", data=json.dumps(dict(key=key, value=value)), content_type="application/json")
+        rv = self.app.post("/database", data=json.dumps(dict(key=key, value=value, existing=True)), content_type="application/json")
         self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
 
         expected = dict(key=key, value=value, value_old=value_old)
@@ -84,15 +84,15 @@ class DatabaseTestCase(unittest.TestCase):
         expected = dict(key=key, value=value)
         self.assertDictEqual(expected, responses.get_json(rv), "JSON mismatch")
 
-        # Update non existing
-        rv = self.app.patch("/database", data=json.dumps(dict(key=key, value=value)), content_type="application/json")
+        # Update (not existing)
+        rv = self.app.post("/database", data=json.dumps(dict(key=key, value=value, existing=True)), content_type="application/json")
         self.assertEqual(404, rv.status_code, "HTTP status code mismatch")
 
-        # Retrieve non existing
+        # Retrieve (not existing)
         rv = self.app.get("/database", query_string=dict(key=key))
         self.assertEqual(404, rv.status_code, "HTTP status code mismatch")
 
-        # Delete non existing
+        # Delete (not existing)
         rv = self.app.delete("/database", data=json.dumps(dict(key=key)), content_type="application/json")
         self.assertEqual(404, rv.status_code, "HTTP status code mismatch")
 

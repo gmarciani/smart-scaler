@@ -1,6 +1,6 @@
-from services.common.model.exceptions.kubernetes_exception import KubernetesException
-from services.common.model.resources.smart_scaler import SmartScalerResource
-from services.common.model.resources.pod import PodResource
+from services.common.model.exceptions.service_exception import KubernetesException
+from services.common.model.resources.smart_scaler_resource import SmartScalerResource
+from services.common.model.resources.pod_resource import PodResource
 from services.common.control import connections as conn_ctrl
 import requests
 import json
@@ -24,7 +24,7 @@ def get_all_smart_scalers(kubernetes_conn):
     except (requests.ConnectionError, json.JSONDecodeError) as exc:
         raise KubernetesException(500, "get_all_smart_scalers: " + str(exc))
 
-    if response.status_code is not 200:
+    if response.status_code != 200:
         raise KubernetesException(response.status_code, response_json["error"])
 
     smart_scalers = []
@@ -52,7 +52,7 @@ def get_all_pods(kubernetes_conn):
     except (requests.ConnectionError, json.JSONDecodeError) as exc:
         raise KubernetesException(500, "get_all_kube_pods: " + str(exc))
 
-    if response.status_code is not 200:
+    if response.status_code != 200:
         raise KubernetesException(response.status_code, response_json["error"])
 
     pods = []
@@ -83,7 +83,7 @@ def get_pod(kubernetes_conn, pod_name):
     except (requests.ConnectionError, json.JSONDecodeError) as exc:
         raise KubernetesException(500, "get_pod_status: " + str(exc))
 
-    if response.status_code is not 200:
+    if response.status_code != 200:
         raise KubernetesException(response.status_code, response_json["error"])
 
     s = response_json["pod"]
@@ -111,7 +111,7 @@ def set_pod_replicas(kubernetes_conn, pod_name, replicas):
     except (requests.ConnectionError, json.JSONDecodeError) as exc:
         raise KubernetesException(500, "set_pod_replicas: " + str(exc))
 
-    if response.status_code is not 200:
+    if response.status_code != 200:
         raise KubernetesException(response.status_code, response_json["error"])
 
     return response_json["replicas_old"], response_json["pod_scaled"]["replicas"]

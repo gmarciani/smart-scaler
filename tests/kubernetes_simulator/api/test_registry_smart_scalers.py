@@ -1,5 +1,5 @@
-from services.common.model.resources.smart_scaler import SmartScalerResource
-from services.common.model.resources.pod import PodResource
+from services.common.model.resources.smart_scaler_resource import SmartScalerResource
+from services.common.model.resources.pod_resource import PodResource
 from services.kubernetes_simulator.app import app as app
 from tests.test_utils import responses
 from tests.test_utils.requests import to_json as to_json
@@ -27,8 +27,20 @@ class RegistrySmartScalersTestCase(unittest.TestCase):
         Test the CRUD of smart scalers.
         :return:
         """
-        smart_scaler = SmartScalerResource("my-smart-scaler-1", "my-pod-1")
-        pod = PodResource("my-pod-1")
+        smart_scaler = SmartScalerResource(
+            name="ss-pod-1",
+            pod_name="pod-1",
+            min_replicas=1,
+            max_replicas=10,
+            ai_technique="QLEARNING",
+            state_granularity=10,
+            state_precision=5,
+            action_magnitude=1,
+            alpha=0.5,
+            gamma=0.9,
+            epsilon=0.1
+        )
+        pod = PodResource("pod-1")
 
         # Retrieve all (empty)
         rv = self.app.get("/registry/smart_scalers")

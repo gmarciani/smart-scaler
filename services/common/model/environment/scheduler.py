@@ -1,4 +1,4 @@
-class SimpleJob:
+class SimpleSchedulerJob:
     """
     A simple scheduler job.
     """

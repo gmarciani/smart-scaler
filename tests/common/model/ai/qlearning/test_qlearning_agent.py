@@ -1,5 +1,5 @@
-from services.common.model.ai.qlearning.agent import SimpleQLearningAgent
-from services.common.model.ai.qlearning import rewarding as rewarding_functions
+from services.common.model.ai.qlearning.qlearning_agent import QLearningAgent
+from services.common.model.ai.qlearning import rewarding
 import random
 import unittest
 
@@ -16,9 +16,9 @@ class QLearningAgentTestCase(unittest.TestCase):
 
         iterations = 100
 
-        agent = SimpleQLearningAgent(states, actions)
+        agent = QLearningAgent(states, actions)
 
-        actual = SimpleQLearningAgent.from_binarys(agent.to_binarys())
+        actual = QLearningAgent.from_binarys(agent.to_binarys())
         expected = agent
         self.assertEqual(expected, actual, "Binary serialization error")
 
@@ -34,7 +34,7 @@ class QLearningAgentTestCase(unittest.TestCase):
 
             agent.save_experience(curr_state, action)
 
-        actual = SimpleQLearningAgent.from_binarys(agent.to_binarys())
+        actual = QLearningAgent.from_binarys(agent.to_binarys())
         expected = agent
         self.assertEqual(expected, actual, "Binary serialization error")
 
@@ -49,11 +49,11 @@ class QLearningAgentTestCase(unittest.TestCase):
             alpha = 0.5
             gamma = 0.5
             epsilon = 0.1
-            rewarding_function = rewarding_functions.stupid_rewarding_function
+            rewarding_function = rewarding.stupid_rewarding_function
 
             iterations = 100
 
-            agent = SimpleQLearningAgent(states, actions, alpha, gamma, epsilon, rewarding_function)
+            agent = QLearningAgent(states, actions, alpha, gamma, epsilon, rewarding_function)
 
             for i in range(iterations):
 

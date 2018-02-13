@@ -1,6 +1,6 @@
 from services.common.model.ai.qlearning import rewarding
 from services.common.util import formatutil
-from services.common.util.json import AdvancedJSONEncoder as JSONEncoder
+from services.common.util.jsonutil import AdvancedJSONEncoder as JSONEncoder
 from json import dumps as json_dumps
 from json import loads as json_loads
 import random
@@ -19,9 +19,9 @@ DEFAULT_Q_VALUE = 0.0
 DEFAULT_REWARDING_FUNCTION = rewarding.stupid_rewarding_function
 
 
-class SimpleQLearningAgent:
+class QLearningAgent:
     """
-    A Q-Learning Agent.
+    The base class for a Q-Learning agent.
     """
 
     def __init__(self, states=None, actions=None, alpha=0.5, gamma=0.9, epsilon=0.1,
@@ -144,7 +144,7 @@ class SimpleQLearningAgent:
         :param other: (SimpleQLearningAgent) the other instance.
         :return: True, if equality is satisfied; False, otherwise.
         """
-        if not isinstance(other, SimpleQLearningAgent):
+        if not isinstance(other, QLearningAgent):
             return False
         return self.__dict__ == other.__dict__
 
@@ -193,7 +193,7 @@ class SimpleQLearningAgent:
         :param json: (string) the JSON string to parse.
         :return: (SimpleQLearningAgent) the parsed agent.
         """
-        return SimpleQLearningAgent.from_json(json_loads(json))
+        return QLearningAgent.from_json(json_loads(json))
 
     @staticmethod
     def from_json(json):
@@ -202,7 +202,7 @@ class SimpleQLearningAgent:
         :param json: (JSONObject) the JSON object to parse.
         :return: (SimpleQLearningAgent) the parsed agent.
         """
-        agent = SimpleQLearningAgent()
+        agent = QLearningAgent()
         for attr_name, attr_value in json.items():
             setattr(agent, attr_name, attr_value)
         return agent

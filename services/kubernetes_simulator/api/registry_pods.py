@@ -1,7 +1,7 @@
 from flask_restful import Resource
 from flask import request
-from services.common.model.resources.pod import PodResource
-from services.common.model.exception import NotFound, BadRequest
+from services.common.model.resources.pod_resource import PodResource
+from services.common.model.exceptions.rest_exceptions import NotFound, BadRequest
 from services.kubernetes_simulator.control import registry as registry_ctrl
 from copy import deepcopy
 

@@ -14,6 +14,9 @@ class SimpleSmartScalersRegistry:
         """
         self._registry = {}
 
+    def values(self):
+        return self._registry.values()
+
     def __iter__(self):
         return self._registry.__iter__()
 

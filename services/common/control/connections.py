@@ -1,5 +1,5 @@
 from flask import current_app
-from services.common.model.connection import SimpleConnection
+from services.common.model.environment.connection import SimpleConnection
 
 
 SERVICES = ["api_gateway", "agents_manager", "repository", "kubernetes"]

@@ -1,5 +1,5 @@
 from services.common.control import connections as conn_ctrl
-from services.common.model.exceptions.repository_exception import RepositoryException
+from services.common.model.exceptions.service_exception import RepositoryException
 import requests
 import json
 import logging
@@ -25,7 +25,7 @@ def get_key(repository_conn, key):
     except (requests.ConnectionError, json.JSONDecodeError) as exc:
         raise RepositoryException(500, "get_key: " + str(exc))
 
-    if response.status_code is 404:
+    if response.status_code == 404:
         return None
     elif response.status_code is not 200:
         raise RepositoryException(response.status_code, response_json["error"])
@@ -53,9 +53,9 @@ def set_key(repository_conn, key, value, unique=False):
     except (requests.ConnectionError, json.JSONDecodeError) as exc:
         raise RepositoryException(500, "set_key: " + str(exc))
 
-    if response.status_code is 404:
+    if response.status_code == 404:
         return None
-    elif response.status_code is not 200:
+    elif response.status_code != 200:
         raise RepositoryException(response.status_code, response_json["error"])
 
     return response_json["value"]
@@ -78,7 +78,7 @@ def delete_key(repository_conn, key):
     except (requests.ConnectionError, json.JSONDecodeError) as exc:
         raise RepositoryException(500, "delete_key: " + str(exc))
 
-    if response.status_code is not 200:
+    if response.status_code != 200:
         raise RepositoryException(response.status_code, response_json["error"])
 
     return response_json["value"]

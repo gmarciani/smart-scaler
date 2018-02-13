@@ -1,9 +1,8 @@
-from services.common.model.exceptions.kubernetes_exception import KubernetesException
-from services.common.model.exceptions.repository_exception import RepositoryException
+from services.common.model.exceptions.service_exception import RepositoryException
 from services.common.control import kubernetes as kubernetes_ctrl
 from services.common.control import repository as repository_ctrl
 from services.agents_manager.model.smart_scalers_registry import SimpleSmartScalersRegistry as SmartScalersRegistry
-from services.common.model.ai.smart_scaling.agent import SmartScaler
+from services.common.model.ai.smart_scaling.smart_scaling_agent import SmartScalerQLearning
 import logging
 
 
@@ -30,21 +29,24 @@ def update_registry(smart_scalers_local, kubernetes_conn, repository_conn):
     :param repository_conn: (SimpleConnection) the connection to the repository.
     :return: None
     """
-    smart_scalers_remote = kubernetes_ctrl.get_all_smart_scalers(kubernetes_conn)
+    smart_scalers_resources_remote = kubernetes_ctrl.get_all_smart_scalers(kubernetes_conn)
 
-    smart_scalers_to_remove = list(set(map(lambda x: x.name, smart_scalers_local)) - set(map(lambda x: x.name, smart_scalers_remote)))
+    smart_scalers_to_remove = list(set(map(lambda smart_scaler_name: smart_scaler_name, smart_scalers_local)) - set(
+        map(lambda smart_scaler_resource: smart_scaler_resource.name, smart_scalers_resources_remote)))
 
-    smart_scalers_to_add = list(filter(lambda x: x.name not in smart_scalers_local, smart_scalers_remote))
+    smart_scalers_resource_to_add = list(
+        filter(lambda smart_scaler: smart_scaler.resource not in smart_scalers_local.values(), smart_scalers_resources_remote))
 
-    logger.debug("Smart Scaler(s) ALL: {}".format(smart_scalers_remote))
-    logger.debug("Smart Scaler(s) to remove: {}".format(smart_scalers_to_remove))
-    logger.debug("Smart Scaler(s) to add: {}".format(smart_scalers_to_add))
+    logger.debug("Smart Scaler(s) REMOTE (resources): {}".format(smart_scalers_resources_remote))
+    logger.debug("Smart Scaler(s) TO REMOVE LOCALLY (names): {}".format(smart_scalers_to_remove))
+    logger.debug("Smart Scaler(s) TO ADD LOCALLY (resources): {}".format(smart_scalers_resource_to_add))
 
-    for smart_scaler in smart_scalers_to_remove:
-        delete_smart_scaler(smart_scalers_local, smart_scaler, repository_conn)
+    for smart_scaler_name in smart_scalers_to_remove:
+        delete_smart_scaler(smart_scalers_local, smart_scaler_name, repository_conn)
 
-    for smart_scaler in smart_scalers_to_add:
-        add_smart_scaler(smart_scalers_local, smart_scaler, repository_conn)
+    for smart_scaler_resource in smart_scalers_resource_to_add:
+        smart_scaler = SmartScalerQLearning()
+        add_smart_scaler(smart_scalers_local, smart_scaler_resource, repository_conn)
 
 
 def apply_scaling(agent, kubernetes_conn):
@@ -87,7 +89,7 @@ def add_smart_scaler(smart_scalers_local, smart_scaler, repository_conn, max_att
         logger.debug(
             "Adding smart scaler {} to remote repository: attempt {}/{}".format(smart_scaler.name, attempts, max_attempts))
         try:
-            repository_ctrl.set_key(repository_conn, smart_scaler.name, smart_scaler.to_binarys, unique=True)
+            repository_ctrl.set_key(repository_conn, smart_scaler.name, smart_scaler.to_binarys(), unique=True)
             logger.debug("Added smart scaler {} to remote repository".format(smart_scaler.name))
             initialized = True
         except RepositoryException as exc:
@@ -136,7 +138,7 @@ def load_smart_scaler(smart_scaler_name, repository_conn):
     :return: the smart scaler.
     """
     binarys = repository_ctrl.get_key(repository_conn, smart_scaler_name)
-    return SmartScaler.from_binarys(binarys)
+    return SmartScalerQLearning.from_binarys(binarys)
 
 
 def store_smart_scaler(smart_scaler, repository_conn):

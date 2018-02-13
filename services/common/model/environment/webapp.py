@@ -6,7 +6,7 @@ from flask import Flask
 from flask_restful import Api
 from werkzeug.exceptions import default_exceptions
 from services.common.control import exception_handler as error_ctrl
-from services.common.util.json import output_json as output_json, SimpleJSONEncoder
+from services.common.util.jsonutil import output_json as output_json, SimpleJSONEncoder
 import atexit
 import logging
 

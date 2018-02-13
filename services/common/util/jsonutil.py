@@ -1,7 +1,7 @@
 from flask import jsonify
-from flask.json import JSONEncoder
+from flask import json
 import inspect
-
+from enum import Enum
 
 def output_json(data, code, headers=None):
     """
@@ -15,7 +15,7 @@ def output_json(data, code, headers=None):
     return jsonify(data)
 
 
-class SimpleJSONEncoder(JSONEncoder):
+class SimpleJSONEncoder(json.JSONEncoder):
 
     def default(self, obj):
         try:
@@ -28,34 +28,43 @@ class SimpleJSONEncoder(JSONEncoder):
         except AttributeError:
             pass
 
-        return JSONEncoder.default(self, obj)
+        return json.JSONEncoder.default(self, obj)
 
 
-class AdvancedJSONEncoder(JSONEncoder):
+class AdvancedJSONEncoder(json.JSONEncoder):
 
     def default(self, obj):
-        print("Processing object: ", obj)
+        #print("Processing object: ", obj)
 
         # if obj is a function
         if inspect.isfunction(obj):
             import_name = obj.__module__ + "." + obj.__name__
-            print("try function ", import_name)
-            return JSONEncoder.default(self, import_name)
+            #print("try function ", import_name)
+            return import_name
+
+        # if obj si an enumeration
+        if isinstance(obj, Enum):
+            #import_name = obj.__module__ + "." + obj.__class__.__name__ + "." + obj.name
+            import_name = obj.name
+            #print("try enumeration ", import_name)
+            return import_name
 
         # if obj is an iterable
         try:
-            print("try iterable")
+            #print("try iterable")
             return list(iter(obj))
         except TypeError as exc:
-            print("TypeError: ", str(exc))
+            pass
+            #print("TypeError: ", str(exc))
 
         # if obj is an object
         try:
-            print("try object")
+            #print("try object")
             return obj.__dict__
         except AttributeError as exc:
-            print("AttributeError: ", str(exc))
+            pass
+            #print("AttributeError: ", str(exc))
 
         # else
-        print("try standard")
-        return JSONEncoder.default(self, obj)
+        #print("try standard")
+        return json.JSONEncoder.default(self, obj)

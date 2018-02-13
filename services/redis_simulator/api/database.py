@@ -1,6 +1,6 @@
 from flask_restful import Resource
 from flask import request
-from services.common.model.exception import NotFound, BadRequest
+from services.common.model.exceptions.rest_exceptions import NotFound, BadRequest
 from services.redis_simulator.control import database as database_ctrl
 
 
@@ -41,35 +41,22 @@ class Database(Resource):
         except KeyError:
             raise BadRequest("Cannot find field(s) 'key', 'value'")
 
-        if "unique" in data and data["unique"] and key in database_ctrl.get_database():
+        uniqueness = "unique" in data and data["unique"]
+        existence = "existing" in data and data["existing"]
+
+        exists = key in database_ctrl.get_database()
+
+        if uniqueness and existence:
+            raise BadRequest("Cannot satisfy request with both uniqueness and existence")
+        elif uniqueness and exists:
             raise BadRequest("Cannot create key {} because it already exists".format(key))
+        elif existence and not exists:
+            raise NotFound("Cannot find key {}".format(key))
 
         try:
             value_old = database_ctrl.get_database()[key]
         except KeyError:
             value_old = None
-
-        database_ctrl.get_database()[key] = value_new
-
-        return dict(key=key, value=value_new, value_old=value_old)
-
-    def patch(self):
-        """
-        Update the value of the existent key.
-        :return: (json) the response.
-        """
-        data = request.get_json()
-
-        try:
-            key = data["key"]
-            value_new = data["value"]
-        except KeyError:
-            raise BadRequest("Cannot find field(s) 'key', 'value'")
-
-        try:
-            value_old = database_ctrl.get_database()[key]
-        except KeyError:
-            raise NotFound("Cannot find key {}".format(key))
 
         database_ctrl.get_database()[key] = value_new
 
