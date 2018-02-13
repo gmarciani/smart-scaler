@@ -1,6 +1,5 @@
 from services.common.model.environment.webapp import WebApp as App
-from services.agents_manager.control.jobs.smart_scaling_loop import smart_scaling_loop_job as smart_scaling_loop_job
-from services.common.control import shutdown as shutdown_ctrl
+from services.agents_manager.control.smart_scaling_loop import smart_scaling_loop_job as smart_scaling_loop_job
 from services.agents_manager.config import Debug as AppConfig
 from services.agents_manager.api.status import Status
 
@@ -15,7 +14,7 @@ app.add_rest_api(Status, "/status")
 app.add_scheduled_job(smart_scaling_loop_job(app.app_context()))
 
 # Shutdown
-app.add_shutdown_hook(shutdown_ctrl.goodbye)
+app.add_shutdown_hook(lambda: print("Goodbye!"))
 
 
 if __name__ == "__main__":

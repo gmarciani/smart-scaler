@@ -1,5 +1,4 @@
 from services.common.model.environment.webapp import WebApp as App
-from services.common.control import shutdown as shutdown_ctrl
 from services.kubernetes_simulator.config import Debug as AppConfig
 from services.kubernetes_simulator.api.status import Status
 from services.kubernetes_simulator.api.registry_pods import Pods
@@ -23,7 +22,7 @@ app.add_teardown_hook(registry_ctrl.teardown_registry)
 app.add_teardown_hook(heapster_ctrl.teardown_heapster)
 
 # Shutdown
-app.add_shutdown_hook(shutdown_ctrl.goodbye)
+app.add_shutdown_hook(lambda: print("Goodbye!"))
 
 
 if __name__ == "__main__":

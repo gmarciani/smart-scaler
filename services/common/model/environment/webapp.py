@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from flask import request, current_app
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.base import STATE_STOPPED
 from flask import Flask
@@ -65,10 +66,20 @@ class WebApp(Flask):
             self.scheduler.start()
         Flask.run(self, host, port, threaded=True, use_reloader=False)
 
+    def shtudown(self):
+        """
+        Shutdown the application.
+        :return: None
+        """
+        fn_shutdown = request.environ.get("werkzeug.server.shutdown")
+        if fn_shutdown is None:
+            raise RuntimeError("Not running with the Werkzeug Server")
+        fn_shutdown()
+
     def add_rest_api(self, res, url):
         """
         Register a REST interface.
-        :param resource: the resource.
+        :param res: the resource.
         :param url: the url.
         :return: None
         """

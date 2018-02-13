@@ -1,4 +1,4 @@
-from services.agents_manager.app import app
+from services.agents_manager.app import app as app
 from tests.test_utils import responses
 
 import unittest

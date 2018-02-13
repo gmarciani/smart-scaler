@@ -1,10 +1,9 @@
-import requests
-import json
-
 from services.common.model.exceptions.kubernetes_exception import KubernetesException
 from services.common.model.resources.smart_scaler import SmartScalerResource
 from services.common.model.resources.pod import PodResource
 from services.common.control import connections as conn_ctrl
+import requests
+import json
 import logging
 
 
@@ -76,9 +75,7 @@ def get_pod(kubernetes_conn, pod_name):
     """
     url = conn_ctrl.format_url("registry/pods", kubernetes_conn)
 
-    data = {
-        "name": pod_name
-    }
+    data = dict(name=pod_name)
 
     try:
         response = requests.get(url, params=data)
@@ -91,11 +88,9 @@ def get_pod(kubernetes_conn, pod_name):
 
     s = response_json["pod"]
     try:
-        pod = PodResource.from_json(s)
+        return PodResource.from_json(s)
     except Exception:
         logger.error("Cannot parse pod {}".format(s))
-
-    return pod
 
 
 def set_pod_replicas(kubernetes_conn, pod_name, replicas):
@@ -108,7 +103,7 @@ def set_pod_replicas(kubernetes_conn, pod_name, replicas):
     """
     url = conn_ctrl.format_url("registry/pods", kubernetes_conn)
 
-    data = {"name": pod_name, "replicas": replicas}
+    data = dict(name=pod_name, replicas=replicas)
 
     try:
         response = requests.patch(url, json=data)

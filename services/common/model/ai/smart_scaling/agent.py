@@ -96,15 +96,7 @@ class SmartScaler:
         """
         if not isinstance(other, SmartScaler):
             return False
-
-        for attr_name_1, attr_val_1 in self.__dict__.items():
-            for attr_name_2, attr_val_2 in other.__dict__.items():
-                if attr_name_1 == attr_name_2:
-                    if attr_val_1 != attr_val_2:
-                        print("Not equal {}".format(attr_name_1))
-                        return False
-        return True
-        #return self.__dict__ == other.__dict__
+        return self.__dict__ == other.__dict__
 
     def __str__(self):
         """

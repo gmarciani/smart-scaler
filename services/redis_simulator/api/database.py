@@ -28,28 +28,6 @@ class Database(Resource):
 
             return dict(key=key, value=value)
 
-    def put(self):
-        """
-        Set the value of the key, that must be unique.
-        :return: the response.
-        """
-        data = request.get_json()
-
-        try:
-            key = data["key"]
-            value = data["value"]
-        except KeyError:
-            raise BadRequest("Cannot find field(s) 'key', 'value'")
-        except TypeError:
-            raise BadRequest("Cannot parse data")
-
-        if key in database_ctrl.get_database():
-            raise BadRequest("Cannot create key {} because it already exists".format(key))
-
-        database_ctrl.get_database()[key] = value
-
-        return dict(key=key, value=value)
-
     def post(self):
         """
         Set the value of the key.
@@ -63,6 +41,9 @@ class Database(Resource):
         except KeyError:
             raise BadRequest("Cannot find field(s) 'key', 'value'")
 
+        if "unique" in data and data["unique"] and key in database_ctrl.get_database():
+            raise BadRequest("Cannot create key {} because it already exists".format(key))
+
         try:
             value_old = database_ctrl.get_database()[key]
         except KeyError:
@@ -70,7 +51,7 @@ class Database(Resource):
 
         database_ctrl.get_database()[key] = value_new
 
-        return dict(key=key, value_new=value_new, value_old=value_old)
+        return dict(key=key, value=value_new, value_old=value_old)
 
     def patch(self):
         """

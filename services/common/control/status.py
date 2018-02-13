@@ -1,6 +1,5 @@
 import requests
 import json
-from datetime import datetime
 from services.common.control import connections as conn_ctrl
 
 

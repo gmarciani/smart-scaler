@@ -5,8 +5,3 @@ def generate_action_space(actions):
     :return: (list(Enum)) the action space, expressed as list of actions.
     """
     return [action for action in actions]
-
-
-if __name__ == "__main__":
-    from common.model import SimpleScalingAction as ScalingAction
-    print(generate_action_space(ScalingAction))

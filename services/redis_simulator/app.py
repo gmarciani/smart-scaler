@@ -1,6 +1,5 @@
 from services.common.model.environment.webapp import WebApp as App
 from services.redis_simulator.config import Debug as AppConfig
-from services.common.control import shutdown as shutdown_ctrl
 from services.redis_simulator.api.status import Status
 from services.redis_simulator.api.database import Database
 from services.redis_simulator.control import database as database_ctrl
@@ -17,7 +16,7 @@ app.add_rest_api(Database, "/database")
 app.add_teardown_hook(database_ctrl.teardown_database)
 
 # Shutdown
-app.add_shutdown_hook(shutdown_ctrl.goodbye)
+app.add_shutdown_hook(lambda: print("Goodbye!"))
 
 
 if __name__ == "__main__":

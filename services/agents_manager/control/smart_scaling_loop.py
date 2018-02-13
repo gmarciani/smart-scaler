@@ -43,9 +43,9 @@ def smart_scaling_loop(ctx):
         logger.info("Smart Scalers (after update): {}".format(smart_scalers))
         for smart_scaler in smart_scalers.values():
             #TODO load only if local version is less than repository version
-            smart_scalers_ctrl.load_smart_scaler(smart_scaler, repository_conn)
+            #smart_scalers_ctrl.load_smart_scaler(smart_scaler, repository_conn)
             smart_scalers_ctrl.apply_scaling(smart_scaler, kubernetes_conn)
-            smart_scalers_ctrl.store_smart_scaler(smart_scaler, repository_conn)
+            #smart_scalers_ctrl.store_smart_scaler(smart_scaler, repository_conn)
     except KubernetesException as exc:
         logger.warning("Error from Kubernetes: {}".format(exc.message))
         return

@@ -24,7 +24,8 @@ class SimpleQLearningAgent:
     A Q-Learning Agent.
     """
 
-    def __init__(self, states=None, actions=None, alpha=0.5, gamma=0.9, epsilon=0.1, rewarding_function=DEFAULT_REWARDING_FUNCTION):
+    def __init__(self, states=None, actions=None, alpha=0.5, gamma=0.9, epsilon=0.1,
+                 rewarding_function=DEFAULT_REWARDING_FUNCTION):
         """
         Create a new Q-Learning agent.
         :param states: (iterable(object)) the state space (Default: None).
@@ -40,7 +41,8 @@ class SimpleQLearningAgent:
         self.gamma = gamma
         self.epsilon = epsilon
 
-        self.rewarding_function = import_string(rewarding_function) if isinstance(rewarding_function, str) else rewarding_function
+        self.rewarding_function = import_string(rewarding_function) if isinstance(rewarding_function,
+                                                                                  str) else rewarding_function
 
         self.qtable = {(s, a): DEFAULT_Q_VALUE for (s, a) in itertools.product(self.states, self.actions)}
 
@@ -144,14 +146,7 @@ class SimpleQLearningAgent:
         """
         if not isinstance(other, SimpleQLearningAgent):
             return False
-        for attr_name_1, attr_val_1 in self.__dict__.items():
-            for attr_name_2, attr_val_2 in other.__dict__.items():
-                if attr_name_1 == attr_name_2:
-                    if attr_val_1 != attr_val_2:
-                        print("Not equal {}".format(attr_name_1))
-                        return False
-        return True
-        #return self.__dict__ == other.__dict__
+        return self.__dict__ == other.__dict__
 
     def __str__(self):
         """

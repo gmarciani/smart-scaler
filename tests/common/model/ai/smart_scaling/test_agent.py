@@ -62,40 +62,43 @@ class SmartScalingAgentTestCase(unittest.TestCase):
         Test the learning loop.
         :return:
         """
-        name = "ss_my_pod"
-        podname = "my_pod"
-        min_replicas = 1
-        max_replicas = 5
-        granularity = 5
-        round = None
-        alpha = 0.5
-        gamma = 0.9
-        epsilon = 0.1
-        rewarding_function = rewarding_functions.simple_rewarding
+        try:
+            name = "ss_my_pod"
+            podname = "my_pod"
+            min_replicas = 1
+            max_replicas = 5
+            granularity = 5
+            round = None
+            alpha = 0.5
+            gamma = 0.9
+            epsilon = 0.1
+            rewarding_function = rewarding_functions.simple_rewarding
 
-        iterations = 100
+            iterations = 100
 
-        agent = QLearningAgent(
-            states=states.ReplicationUtilizationSpace(min_replicas, max_replicas, granularity, round),
-            actions=actions_utils.generate_action_space(ScalingAction),
-            alpha=alpha, gamma=gamma, epsilon=epsilon,
-            rewarding_function=rewarding_function)
+            agent = QLearningAgent(
+                states=states.ReplicationUtilizationSpace(min_replicas, max_replicas, granularity, round),
+                actions=actions_utils.generate_action_space(ScalingAction),
+                alpha=alpha, gamma=gamma, epsilon=epsilon,
+                rewarding_function=rewarding_function)
 
-        scaler = SmartScaler(name, podname, min_replicas, max_replicas, agent)
+            scaler = SmartScaler(name, podname, min_replicas, max_replicas, agent)
 
-        pod = PodResource(podname, min_replicas)
+            pod = PodResource(podname, min_replicas)
 
-        for i in range(iterations):
+            for i in range(iterations):
 
-            pod.cpu_utilization = random.random()
+                pod.cpu_utilization = random.random()
 
-            curr_state = scaler.map_state(pod.replicas, pod.cpu_utilization)
+                curr_state = scaler.map_state(pod.replicas, pod.cpu_utilization)
 
-            new_replicas, action = scaler.get_replicas(curr_state, return_action=True)
+                new_replicas, action = scaler.get_replicas(curr_state, return_action=True)
 
-            pod.replicas = new_replicas
+                pod.replicas = new_replicas
 
-            scaler.save_experience(curr_state, action)
+                scaler.save_experience(curr_state, action)
+        except Exception as exc:
+            self.fail("Error during learning loop: {}".format(exc))
 
 
 if __name__ == "__main__":

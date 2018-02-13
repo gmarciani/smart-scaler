@@ -43,28 +43,31 @@ class QLearningAgentTestCase(unittest.TestCase):
         Test the learning loop.
         :return: None
         """
-        states = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-        actions = [-1, 0, 1]
-        alpha = 0.5
-        gamma = 0.5
-        epsilon = 0.1
-        rewarding_function = rewarding_functions.stupid_rewarding_function
+        try:
+            states = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+            actions = [-1, 0, 1]
+            alpha = 0.5
+            gamma = 0.5
+            epsilon = 0.1
+            rewarding_function = rewarding_functions.stupid_rewarding_function
 
-        iterations = 100
+            iterations = 100
 
-        agent = SimpleQLearningAgent(states, actions, alpha, gamma, epsilon, rewarding_function)
+            agent = SimpleQLearningAgent(states, actions, alpha, gamma, epsilon, rewarding_function)
 
-        for i in range(iterations):
+            for i in range(iterations):
 
-            curr_state = random.choice(states)
+                curr_state = random.choice(states)
 
-            reward = agent.get_reward(curr_state)
+                reward = agent.get_reward(curr_state)
 
-            agent.learn(reward, curr_state)
+                agent.learn(reward, curr_state)
 
-            action = agent.get_action(curr_state)
+                action = agent.get_action(curr_state)
 
-            agent.save_experience(curr_state, action)
+                agent.save_experience(curr_state, action)
+        except Exception as exc:
+            self.fail("Error during learning loop: {}".format(exc))
 
 
 if __name__ == "__main__":

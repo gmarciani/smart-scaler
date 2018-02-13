@@ -10,7 +10,7 @@ def pprint_qtable(qtable):
 def pprint_2d_matrix(matrix):
     """
     Return the pretty string representation of a 2D matrix.
-    :param q_table: (object) the 2D matrix.
+    :param matrix: (object) the 2D matrix.
     :return: (string) the pretty string representation of a 2D matrix.
     """
     s = [[str(e) for e in row] for row in matrix]

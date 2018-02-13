@@ -1,5 +1,4 @@
 from services.common.model.environment.webapp import WebApp as App
-from services.common.control import shutdown as shutdown_ctrl
 from services.api_gateway.config import Debug as AppConfig
 from services.api_gateway.api.status import Status
 
@@ -11,7 +10,7 @@ app = App(__name__, AppConfig)
 app.add_rest_api(Status, "/status")
 
 # Shutdown
-app.add_shutdown_hook(shutdown_ctrl.goodbye)
+app.add_shutdown_hook(lambda: print("Goodbye!"))
 
 
 if __name__ == "__main__":

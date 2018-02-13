@@ -37,14 +37,14 @@ class DatabaseTestCase(unittest.TestCase):
         self.assertEqual(values_expected, values_actual, "Value mismatch")
 
         # Create
-        rv = self.app.put("/database", data=json.dumps(dict(key=key, value=value)), content_type="application/json")
+        rv = self.app.post("/database", data=json.dumps(dict(key=key, value=value)), content_type="application/json")
         self.assertEqual(200, rv.status_code, "HTTP status code mismatch")
 
-        expected = dict(key=key, value=value)
+        expected = dict(key=key, value=value, value_old=None)
         self.assertDictEqual(expected, responses.get_json(rv), "JSON mismatch")
 
         # Create existing
-        rv = self.app.put("/database", data=json.dumps(dict(key=key, value=value)), content_type="application/json")
+        rv = self.app.post("/database", data=json.dumps(dict(key=key, value=value, unique=True)), content_type="application/json")
         self.assertEqual(400, rv.status_code, "HTTP status code mismatch")
 
         # Retrieve

@@ -2,16 +2,17 @@ import numpy as np
 import itertools
 
 
-def generate_space_replicas_utilization(min_replicas, max_replicas, granularity, round=None):
+def generate_space_replicas_utilization(min_replicas, max_replicas, granularity, precision=None):
     """
     Generate the state space, expressed as list of floats.
     :param min_replicas: (integer) the minimum replication degree.
     :param max_replicas: (integer) the maximum replication degree.
     :param granularity: (integer) the granularity of the utilization space.
+    :param precision: (integer) the precision of the utilization space.
     :return: (list(tuple(replicas, utilization))) the state space, expressed as list of tuples.
     """
     replication_space = generate_space_range(min_replicas, max_replicas)
-    utilization_space = generate_space_normalized(granularity, round)
+    utilization_space = generate_space_normalized(granularity, precision)
     return list(itertools.product(replication_space, utilization_space))
 
 
