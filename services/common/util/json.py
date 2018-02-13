@@ -1,7 +1,6 @@
 from flask import jsonify
 from flask.json import JSONEncoder
-
-from services.common.model.resources.pod import PodResource
+import inspect
 
 
 def output_json(data, code, headers=None):
@@ -16,7 +15,7 @@ def output_json(data, code, headers=None):
     return jsonify(data)
 
 
-class MyJSONEncoder(JSONEncoder):
+class SimpleJSONEncoder(JSONEncoder):
 
     def default(self, obj):
         try:
@@ -29,4 +28,34 @@ class MyJSONEncoder(JSONEncoder):
         except AttributeError:
             pass
 
+        return JSONEncoder.default(self, obj)
+
+
+class AdvancedJSONEncoder(JSONEncoder):
+
+    def default(self, obj):
+        print("Processing object: ", obj)
+
+        # if obj is a function
+        if inspect.isfunction(obj):
+            import_name = obj.__module__ + "." + obj.__name__
+            print("try function ", import_name)
+            return JSONEncoder.default(self, import_name)
+
+        # if obj is an iterable
+        try:
+            print("try iterable")
+            return list(iter(obj))
+        except TypeError as exc:
+            print("TypeError: ", str(exc))
+
+        # if obj is an object
+        try:
+            print("try object")
+            return obj.__dict__
+        except AttributeError as exc:
+            print("AttributeError: ", str(exc))
+
+        # else
+        print("try standard")
         return JSONEncoder.default(self, obj)

@@ -1,8 +1,13 @@
 from services.common.model.ai.qlearning import rewarding
 from services.common.util import formatutil
+from services.common.util.json import AdvancedJSONEncoder as JSONEncoder
+from json import dumps as json_dumps
+from json import loads as json_loads
 import random
 import itertools
 import logging
+from services.common.util.sysutil import import_string as import_string
+import pickle
 
 
 # Configure logger
@@ -19,24 +24,28 @@ class SimpleQLearningAgent:
     A Q-Learning Agent.
     """
 
-    def __init__(self, states, actions, alpha, gamma, epsilon, rewarding_function=DEFAULT_REWARDING_FUNCTION):
+    def __init__(self, states=None, actions=None, alpha=0.5, gamma=0.9, epsilon=0.1, rewarding_function=DEFAULT_REWARDING_FUNCTION):
         """
         Create a new Q-Learning agent.
-        :param states: (iterable(object)) the state space.
+        :param states: (iterable(object)) the state space (Default: None).
         :param actions: (iterable(object)) the action space.
-        :param alpha: (float) the qlearning rate (Typical: 0.5).
-        :param gamma: (float) the discount factor (Typical: 0.9).
-        :param epsilon: (float) the exploration factor (Typical: 0.1).
-        :param rewarding_function: (function) the rewardng function (Default: reward_utils.simple_rewarding).
+        :param alpha: (float) the qlearning rate (Default: 0.5).
+        :param gamma: (float) the discount factor (Default: 0.9).
+        :param epsilon: (float) the exploration factor (Default: 0.1).
+        :param rewarding_function: (function|string) the rewarding function (Default: reward_utils.simple_rewarding).
         """
         self.states = states
         self.actions = actions
         self.alpha = alpha
         self.gamma = gamma
         self.epsilon = epsilon
-        self.rewarding_function = rewarding_function
 
-        self.qtable = {(s,a): DEFAULT_Q_VALUE for s,a in itertools.product(self.states, self.actions)}
+        self.rewarding_function = import_string(rewarding_function) if isinstance(rewarding_function, str) else rewarding_function
+
+        self.qtable = {(s, a): DEFAULT_Q_VALUE for (s, a) in itertools.product(self.states, self.actions)}
+
+        self.last_state = None
+        self.last_action = None
 
     def get_reward(self, curr_state):
         """
@@ -55,21 +64,21 @@ class SimpleQLearningAgent:
         """
         return self.qtable[(state, action)]
 
-    def learn(self, state_1, action_1, reward, state_2):
+    def learn(self, reward, state_2):
         """
         Execute the qlearning step.
         Q(s, a) += alpha * (reward(s,a) + max(Q(s') - Q(s,a))
         Q(s, a) = (1-alpha) * Q(s, a) + alpha * (reward(s, a) + gamma * max_{a}(Q(s,a)))
-        :param state_1: (object) the previous state.
-        :param action_1: (object) the previous action.
         :param reward: (float) the reward for the pair (state_1, action_1).
         :param state_2: (object) the current state.
-        :return:
+        :return: None
         """
-        curr_qvalue = self.get_qvalue(state_1, action_1)
+        if self.last_state is None:
+            return
+        curr_qvalue = self.get_qvalue(self.last_state, self.last_action)
         max_qvalue = max([self.get_qvalue(state_2, a) for a in self.actions])
         learned_value = reward + self.gamma * max_qvalue
-        self.qtable[(state_1, action_1)] = (1.0 - self.alpha) * curr_qvalue + self.alpha * learned_value
+        self.qtable[(self.last_state, self.last_action)] = (1.0 - self.alpha) * curr_qvalue + self.alpha * learned_value
 
     def get_action(self, state):
         """
@@ -102,6 +111,16 @@ class SimpleQLearningAgent:
 
         return next_action
 
+    def save_experience(self, state, action):
+        """
+        Save the last experience.
+        :param state: the current state.
+        :param action: the last action.
+        :return: None
+        """
+        self.last_state = state
+        self.last_action = action
+
     def pretty(self):
         """
         Return the pretty string representation.
@@ -115,8 +134,24 @@ class SimpleQLearningAgent:
         s += "\n\tEpsilon: {}".format(self.epsilon)
         s += "\n\tRewarding: {}".format(self.rewarding_function.__module__+"."+self.rewarding_function.__name__)
         s += "\n\tQTable:\n{}".format(formatutil.pprint_qtable(self.qtable))
-
         return s
+
+    def __eq__(self, other):
+        """
+        Test equality.
+        :param other: (SimpleQLearningAgent) the other instance.
+        :return: True, if equality is satisfied; False, otherwise.
+        """
+        if not isinstance(other, SimpleQLearningAgent):
+            return False
+        for attr_name_1, attr_val_1 in self.__dict__.items():
+            for attr_name_2, attr_val_2 in other.__dict__.items():
+                if attr_name_1 == attr_name_2:
+                    if attr_val_1 != attr_val_2:
+                        print("Not equal {}".format(attr_name_1))
+                        return False
+        return True
+        #return self.__dict__ == other.__dict__
 
     def __str__(self):
         """
@@ -131,54 +166,48 @@ class SimpleQLearningAgent:
         Return the string representation.
         :return: (string) the string representation.
         """
-        return self.__str__()
+        return self.__dict__.__str__()
 
+    def to_binarys(self):
+        """
+        Return the binary string representation.
+        :return: the binary string representation.
+        """
+        return pickle.dumps(self)
 
-if __name__ == "__main__":
-    states = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-    actions = [-1, 0, 1]
-    alpha = 0.5
-    gamma = 0.5
-    epsilon = 0.1
-    rewarding_function = rewarding.stupid_rewarding_function
-    agent = SimpleQLearningAgent(states, actions, alpha, gamma, epsilon, rewarding_function)
+    def to_jsons(self):
+        """
+        Return the JSON string representation.
+        :return: the JSON string representation.
+        """
+        return json_dumps(self, cls=JSONEncoder)
 
-    print(agent)
-    print(agent.pretty())
+    @staticmethod
+    def from_binarys(binarys):
+        """
+        Parse a SimpleQLearningAgent from a binary string.
+        :param binarys: (string) the binary string to parse.
+        :return: (SimpleQLearningAgent) the parsed agent.
+        """
+        return pickle.loads(binarys)
 
-    cnt = {}
-    for state in states:
-        for action in actions:
-            cnt[(state,action)] = 0
+    @staticmethod
+    def from_jsons(json):
+        """
+        Parse a SimpleQLearningAgent from a JSON string.
+        :param json: (string) the JSON string to parse.
+        :return: (SimpleQLearningAgent) the parsed agent.
+        """
+        return SimpleQLearningAgent.from_json(json_loads(json))
 
-    last_state = None
-    last_action = None
-    iterations = 10
-    for i in range(iterations):
-        print("Iteration {}/{}".format(i, iterations))
-
-        curr_state = random.choice(states)
-
-        reward = agent.get_reward(curr_state)
-
-        print("State={} | Reward={}".format(curr_state, reward))
-
-        if last_state is not None:
-            agent.learn(last_state, last_action, reward, curr_state)
-
-        action = agent.get_action(curr_state)
-
-        print("State={} | Reward={} | Action={}".format(curr_state, reward, action))
-
-        cnt[(curr_state,action)] += 1
-
-        last_state = curr_state
-        last_action = action
-
-        print(agent.pretty())
-
-        print("-" * 15)
-
-    for state in states:
-        for action in actions:
-            print("{} => {} : {}".format(state, action, cnt[(state, action)]))
+    @staticmethod
+    def from_json(json):
+        """
+        Parse a SimpleQLearningAgent from a JSON object.
+        :param json: (JSONObject) the JSON object to parse.
+        :return: (SimpleQLearningAgent) the parsed agent.
+        """
+        agent = SimpleQLearningAgent()
+        for attr_name, attr_value in json.items():
+            setattr(agent, attr_name, attr_value)
+        return agent

@@ -16,13 +16,30 @@ class ReplicationUtilizationState:
         self.replicas = replicas
         self.utilization = utilization
 
+    def __eq__(self, other):
+        """
+        Test equality.
+        :param other: (ReplicationUtilizationState) the other instance.
+        :return: True, if equality is satisfied; False, otherwise.
+        """
+        if not isinstance(other, ReplicationUtilizationState):
+            return False
+        return self.__dict__ == other.__dict__
+
     def __lt__(self, other):
         """
         Less-than operator.
         :param other: the other object to compare.
         :return: True, if self is less than other; False, otherwise.
-        """
+       """
         return self.replicas < other.replicas if self.replicas != other.replicas else self.utilization < other.utilization
+
+    def __hash__(self):
+        """
+        Hash function.
+        :return: the hash code.
+        """
+        return hash(str(self))
 
     def __str__(self):
         """
@@ -52,7 +69,7 @@ class ReplicationUtilizationSpace:
         self.replication_space = states_utils.generate_space_range(min_replicas, max_replicas)
         self.utilization_space = states_utils.generate_space_normalized(granularity, round)
 
-        self.space = list(ReplicationUtilizationState(r, u) for (r,u) in itertools.product(self.replication_space, self.utilization_space))
+        self.space = tuple(ReplicationUtilizationState(r, u) for (r, u) in itertools.product(self.replication_space, self.utilization_space))
 
     def map_status2state(self, replicas, utilization):
         """
@@ -78,6 +95,16 @@ class ReplicationUtilizationSpace:
         """
         return self.space.__len__()
 
+    def __eq__(self, other):
+        """
+        Test equality.
+        :param other: (ReplicationUtilizationState) the other instance.
+        :return: True, if equality is satisfied; False, otherwise.
+        """
+        if not isinstance(other, ReplicationUtilizationSpace):
+            return False
+        return self.space == other.space
+
     def __str__(self):
         """
         Return the string representation.
@@ -91,11 +118,3 @@ class ReplicationUtilizationSpace:
         :return: (string) the string representation.
         """
         return self.__str__()
-
-
-if __name__ == "__main__":
-    s3 = ReplicationUtilizationSpace(1, 10, 10)
-    print(s3)
-
-    for state in s3:
-        print(state)

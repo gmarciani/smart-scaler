@@ -1,8 +1,8 @@
 from services.common.model.resources.smart_scaler import SmartScalerResource
 from services.common.model.resources.pod import PodResource
 from services.kubernetes_simulator.app import app as app
-from tests.common import responses
-from tests.common.requests import to_json as to_json
+from tests.test_utils import responses
+from tests.test_utils.requests import to_json as to_json
 import unittest
 
 

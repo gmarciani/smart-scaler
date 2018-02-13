@@ -1,7 +1,7 @@
 import requests
 import json
 from services.common.control import connections as conn_ctrl
-from common.model.exceptions.repo_manager_exception import RepositoryException
+from common.model import RepositoryException
 
 
 def create_learning_context(repo_manager_conn, context_id, context_params):

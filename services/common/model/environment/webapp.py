@@ -5,7 +5,7 @@ from flask import Flask
 from flask_restful import Api
 from werkzeug.exceptions import default_exceptions
 from services.common.control import exception_handler as error_ctrl
-from services.common.util.json import output_json as output_json, MyJSONEncoder
+from services.common.util.json import output_json as output_json, SimpleJSONEncoder
 import atexit
 import logging
 
@@ -31,13 +31,13 @@ class WebApp(Flask):
         self.api = Api(self)
 
         # JSON Response
-        self.json_encoder = MyJSONEncoder
+        self.json_encoder = SimpleJSONEncoder
         self.api.representations = OrderedDict(REPRESENTATIONS)
 
         # Error Handling
-        #for exc in default_exceptions:
-        #    self.register_error_handler(exc, error_ctrl.handle_exception)
-        #self.register_error_handler(Exception, error_ctrl.handle_exception)
+        for exc in default_exceptions:
+            self.register_error_handler(exc, error_ctrl.handle_exception)
+        self.register_error_handler(Exception, error_ctrl.handle_exception)
 
         # Logging
         level = logging._nameToLevel[self.config["LOG_LEVEL"]]

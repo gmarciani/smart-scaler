@@ -3,7 +3,7 @@ Registry of smart scaling agents.
 """
 
 
-class SimpleAgentsRegistry:
+class SimpleSmartScalersRegistry:
     """
     A simple registry of smart scaling agents.
     """

@@ -1,4 +1,7 @@
+from services.common.model.exceptions.kubernetes_exception import KubernetesException
+from services.common.model.exceptions.repository_exception import RepositoryException
 from services.common.control import kubernetes as kubernetes_ctrl
+from services.agents_manager.model.smart_scalers_registry import SimpleSmartScalersRegistry as SmartScalersRegistry
 from services.common.model.ai.smart_scaling.agent import SmartScaler
 import logging
 
@@ -7,29 +10,40 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def update_registry(agents, kubernetes_conn, repository_conn):
+SMART_SCALERS_REGISTRY = SmartScalersRegistry()
+
+
+def get_local_registry():
+    """
+    Retrieve the local registry of smart scalers.
+    :return: the local regisry of smart scalers.
+    """
+    return SMART_SCALERS_REGISTRY
+
+
+def update_registry(smart_scalers_local, kubernetes_conn, repository_conn):
     """
     Update the agents registry pulling currently active Smart Scalers on Kubernetes.
-    :param agents: (dict) the repository of agents ({smart_scaler_name: agent}).
+    :param smart_scalers_local: (dict) the repository of agents ({smart_scaler_name: agent}).
     :param kubernetes_conn: (SimpleConnection) the connection to Kubernetes.
     :param repository_conn: (SimpleConnection) the connection to the repository.
     :return: None
     """
-    smart_scalers_all = kubernetes_ctrl.get_all_smart_scalers(kubernetes_conn)
+    smart_scalers_remote = kubernetes_ctrl.get_all_smart_scalers(kubernetes_conn)
 
-    smart_scalers_to_remove = list(set(map(lambda x: x.name, agents)) - set(map(lambda x: x.name, smart_scalers_all)))
+    smart_scalers_to_remove = list(set(map(lambda x: x.name, smart_scalers_local)) - set(map(lambda x: x.name, smart_scalers_remote)))
 
-    smart_scalers_to_add = list(filter(lambda x: x.name not in agents, smart_scalers_all))
+    smart_scalers_to_add = list(filter(lambda x: x.name not in smart_scalers_local, smart_scalers_remote))
 
-    logger.debug("Smart Scaler(s) ALL: {}".format(smart_scalers_all))
+    logger.debug("Smart Scaler(s) ALL: {}".format(smart_scalers_remote))
     logger.debug("Smart Scaler(s) to remove: {}".format(smart_scalers_to_remove))
     logger.debug("Smart Scaler(s) to add: {}".format(smart_scalers_to_add))
 
     for smart_scaler in smart_scalers_to_remove:
-        delete_local_smart_scaler(agents, smart_scaler)
+        delete_local_smart_scaler(smart_scalers_local, smart_scaler)
 
     for smart_scaler in smart_scalers_to_add:
-        add_local_smart_scaler(agents, smart_scaler, repository_conn)
+        add_local_smart_scaler(smart_scalers_local, smart_scaler, repository_conn)
 
 
 def apply_scaling(agent, kubernetes_conn):
@@ -50,10 +64,20 @@ def apply_scaling(agent, kubernetes_conn):
     kubernetes_ctrl.set_pod_replicas(kubernetes_conn, pod_name, new_replicas)
 
 
-def backup_agent(agent, repository_conn):
+def load_smart_scaler(smart_scaler, repository_conn):
     """
     Apply scaling actions provided by agents.
-    :param agent: the smart scaler agent.
+    :param smart_scaler: the smart scaler agent.
+    :param repository_conn: (SimpleConnection) the connection to the repository.
+    :return: None
+    """
+    pass
+
+
+def store_smart_scaler(smart_scaler, repository_conn):
+    """
+    Apply scaling actions provided by agents.
+    :param smart_scaler: the smart scaler agent.
     :param repository_conn: (SimpleConnection) the connection to the repository.
     :return: None
     """
@@ -97,7 +121,7 @@ def add_local_smart_scaler(smart_scaler, kubernetes_conn, repository_conn, agent
             initialized = True
         except KubernetesException as exc:
             logger.warning("Error from Kubernetes: {}".format(exc.message))
-        except RepositoryManagerException as exc:
+        except RepositoryException as exc:
             logger.warning("Error from Repository Manager: {}".format(exc.message))
 
     if initialized:
@@ -126,7 +150,7 @@ def delete_local_smart_scaler(agents, smart_scaler_name):
             removed = True
         except KubernetesException as exc:
             logger.warning("Error from Kubernetes: {}".format(str(exc)))
-        except RepositoryManagerException as exc:
+        except RepositoryException as exc:
             if exc.code == 404:
                 removed = True
             logger.warning("Error from Repository Manager: {}".format(exc.message))
@@ -134,9 +158,4 @@ def delete_local_smart_scaler(agents, smart_scaler_name):
     if removed:
         del agents[agent.name]
         logger.debug("Removed Smart Scaler {}".format(agent.name))
-
-
-def backup_smart_scaler(agent, repository_conn):
-    pass
-
 

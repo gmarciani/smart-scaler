@@ -1,5 +1,5 @@
 from services.redis_simulator.app import app as app
-from tests.common import responses
+from tests.test_utils import responses
 import unittest
 
 
