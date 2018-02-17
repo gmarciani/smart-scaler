@@ -1,3 +1,4 @@
+from services.common.model.ai.smart_scaling import smart_scaler_factory
 from services.common.model.resources.smart_scaler_resource import SmartScalerResource
 from services.common.model.resources.pod_resource import PodResource
 from services.common.model.ai.smart_scaling.smart_scaling_agent import SmartScalerQLearning
@@ -77,11 +78,12 @@ class SmartScalingAgentTestCase(unittest.TestCase):
 
             iterations = 100
 
-            resource = SmartScalerResource(
-                name="ss_my_pod",
-                pod_name="my_pod",
+            smart_scaler_resource = SmartScalerResource(
+                name="ss-pod-1",
+                pod_name="pod-1",
                 min_replicas=1,
-                max_replicas=5
+                max_replicas=10,
+                ai_technique="QLEARNING"
             )
 
             agent = QLearningAgent(
@@ -90,7 +92,7 @@ class SmartScalingAgentTestCase(unittest.TestCase):
                 alpha=alpha, gamma=gamma, epsilon=epsilon,
                 rewarding_function=rewarding_function)
 
-            scaler = SmartScalerQLearning(resource, agent)
+            smart_scaler = smart_scaler_factory.create(smart_scaler_resource)
 
             pod = PodResource(podname, min_replicas)
 
@@ -98,13 +100,13 @@ class SmartScalingAgentTestCase(unittest.TestCase):
 
                 pod.cpu_utilization = random.random()
 
-                curr_state = scaler.map_state(pod.replicas, pod.cpu_utilization)
+                curr_state = smart_scaler.map_state(pod.replicas, pod.cpu_utilization)
 
-                new_replicas, action = scaler.get_replicas(curr_state, return_action=True)
+                new_replicas, action = smart_scaler.get_replicas(curr_state, return_action=True)
 
                 pod.replicas = new_replicas
 
-                scaler.save_experience(curr_state, action)
+                smart_scaler.save_experience(curr_state, action)
         except Exception as exc:
             self.fail("Error during learning loop: {}".format(exc))
 
