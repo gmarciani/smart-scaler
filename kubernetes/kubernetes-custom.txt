@@ -1,0 +1,43 @@
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: scalers.stable.gmarciani.com
+spec:
+  group: stable.gmarciani.com
+  version: v1
+  scope: Namespaced
+  names:
+    plural: scalers
+    singular: scaler
+    kind: Scaler
+    shortNames:
+    - sclr
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          properties:
+            address:
+              type: string
+              pattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
+            port:
+              type: integer
+              minimum: 3000
+              maximum: 65535
+            apitoken:
+              type: string
+
+---
+apiVersion: "stable.gmarciani.com/v1"
+kind: Scaler
+metadata:
+  name: my-scaler
+  finalizers:
+  - finalizer.stable.example.com
+spec:
+  address: "192.168.0.1"
+  port: 3333
+  token: "thisismyapitoken"
+  cronSpec: "* * * * */5"
+  image: my-awesome-cron-image
