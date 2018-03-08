@@ -1,4 +1,5 @@
 from services.common.model.ai.ai_techniques import AITechnique
+from services.common.model.ai.smart_scaling.smart_scaling_agent import SmartScalerQLearning
 import logging
 
 
@@ -18,6 +19,8 @@ def create(resource):
 
     if ai_technique is AITechnique.QLEARNING:
         logger.debug("Creating a smart scaler with AI technique {}".format(ai_technique.name))
-
+        scaler = SmartScalerQLearning(resource)
     else:
         raise ValueError("Cannot instantiate smart scaler with AI technique {}".format(ai_technique.name))
+
+    return scaler

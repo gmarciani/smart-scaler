@@ -1,5 +1,7 @@
 import pickle
-
+from services.common.model.ai.smart_scaling import states
+from services.common.model.ai.smart_scaling import actions_utils
+from services.common.model.ai.smart_scaling import agent_factory
 from services.common.model.ai.qlearning.qlearning_agent import QLearningAgent
 from services.common.util import mathutil
 from services.common.util.jsonutil import SimpleJSONEncoder as JSONEncoder
@@ -17,17 +19,13 @@ class SmartScalerQLearning:
     The base class for a smart scaler that leverage Q-Learning.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, resource):
         """
         Create a new smart scaler.
         :param resource: (SmartScalerResource) the resource.
         """
         self.resource = resource
-        self.agent = QLearningAgent(
-            states=states.ReplicationUtilizationSpace(min_replicas, max_replicas, granularity, round),
-            actions=actions_utils.generate_action_space(ScalingAction),
-            alpha=alpha, gamma=gamma, epsilon=epsilon,
-            rewarding_function=rewarding_function)
+        self.agent = agent_factory.build(resource)
 
     def map_state(self, replicas, utilization):
         """

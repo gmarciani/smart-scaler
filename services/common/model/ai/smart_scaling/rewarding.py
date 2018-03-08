@@ -1,8 +1,20 @@
-def simple_rewarding(curr_state):
+from random import random
+
+
+def reward_random(curr_state):
     """
-    Compute the reward for the given state.
+    Compute the reward for the given state, according to policy 'RANDOM'.
     :param curr_state: (ReplicationUtilizationState) the current state.
-    :return: (float) the reward
+    :return: (float) the reward.
+    """
+    return random()
+
+
+def reward_naive(curr_state):
+    """
+    Compute the reward for the given state, according to policy 'NAIVE'.
+    :param curr_state: (ReplicationUtilizationState) the current state.
+    :return: (float) the reward.
     """
     replicas = curr_state.replicas
     utilization = curr_state.utilization

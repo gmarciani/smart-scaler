@@ -1,7 +1,7 @@
 from services.common.model.resources.pod_resource import PodResource
 from services.kubernetes_simulator.app import app as app
-from tests.test_utils import responses
-from tests.test_utils.requests import to_json as to_json
+from tests.utils import responses
+from tests.utils.requests import to_json as to_json
 import unittest
 from copy import deepcopy
 

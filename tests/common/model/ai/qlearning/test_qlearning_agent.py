@@ -49,7 +49,7 @@ class QLearningAgentTestCase(unittest.TestCase):
             alpha = 0.5
             gamma = 0.5
             epsilon = 0.1
-            rewarding_function = rewarding.stupid_rewarding_function
+            rewarding_function = rewarding.reward_naive
 
             iterations = 100
 

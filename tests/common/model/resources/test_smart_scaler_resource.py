@@ -14,20 +14,8 @@ class SmartScalerResourceTestCase(unittest.TestCase):
             pod_name="pod-1",
             min_replicas=1,
             max_replicas=10,
-            ai_technique="QLEARNING_RND"
-        )
-
-        actual = SmartScalerResource.from_jsons(smart_scaler_resource.to_jsons())
-
-        expected = smart_scaler_resource
-        self.assertEqual(expected, actual, "JSON serialization error")
-
-        smart_scaler_resource = SmartScalerResource(
-            name="ss-pod-1",
-            pod_name="pod-1",
-            min_replicas=1,
-            max_replicas=10,
             ai_technique="QLEARNING",
+            rewarding_function="reward_naive",
             state_granularity=10,
             state_precision=5,
             action_magnitude=1,
@@ -51,20 +39,8 @@ class SmartScalerResourceTestCase(unittest.TestCase):
             pod_name="pod-1",
             min_replicas=1,
             max_replicas=10,
-            ai_technique="QLEARNING_RND"
-        )
-
-        actual = SmartScalerResource.from_json(smart_scaler_resource.to_json())
-
-        expected = smart_scaler_resource
-        self.assertEqual(expected, actual, "JSON conversion error")
-
-        smart_scaler_resource = SmartScalerResource(
-            name="ss-pod-1",
-            pod_name="pod-1",
-            min_replicas=1,
-            max_replicas=10,
             ai_technique="QLEARNING",
+            rewarding_function="reward_naive",
             state_granularity=10,
             state_precision=5,
             action_magnitude=1,

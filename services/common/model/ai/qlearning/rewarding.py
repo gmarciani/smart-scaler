@@ -1,8 +1,20 @@
-def stupid_rewarding_function(curr_state):
+from random import random
+
+
+def reward_random(curr_state):
     """
-    Compute the reward for the given state.
+    Compute the reward for the given state, according to policy 'RANDOM'.
     :param curr_state: (float) the current state.
-    :return: (float) the reward
+    :return: (float) the reward.
+    """
+    return random()
+
+
+def reward_naive(curr_state):
+    """
+    Compute the reward for the given state, according to policy 'NAIVE'.
+    :param curr_state: (float) the current state.
+    :return: (float) the reward.
     """
     if curr_state > 0.5:
         reward = -100

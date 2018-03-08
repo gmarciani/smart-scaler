@@ -3,8 +3,6 @@ from services.common.util.jsonutil import AdvancedJSONEncoder as JSONEncoder
 from json import dumps as json_dumps
 from json import loads as json_loads
 from sys import maxsize as MAX_INT
-from enum import Enum
-import inspect
 
 
 class SmartScalerResource:

@@ -1,4 +1,4 @@
-from enum import Enum, unique, auto
+from enum import Enum, unique
 from functools import total_ordering
 
 
@@ -7,10 +7,9 @@ from functools import total_ordering
 class AITechnique(Enum):
     """
     Techniques of Artificial Intelligence for Smart Scaling.
-    *QLEARNING* is used to mean that no replication should be added.
     """
-    QLEARNING = auto()
-    QLEARNING_RND = auto()
+    RANDOM = 1
+    QLEARNING = 2
 
     def __lt__(self, other):
         """

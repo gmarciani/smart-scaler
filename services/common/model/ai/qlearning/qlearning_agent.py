@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 REWARD_MAX = float("inf")
 DEFAULT_Q_VALUE = 0.0
 
-DEFAULT_REWARDING_FUNCTION = rewarding.stupid_rewarding_function
+DEFAULT_REWARDING_FUNCTION = rewarding.reward_naive
 
 
 class QLearningAgent:

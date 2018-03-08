@@ -1,5 +1,5 @@
 from services.api_gateway.app import app
-from tests.test_utils import responses
+from tests.utils import responses
 
 import unittest
 
