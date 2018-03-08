@@ -12,9 +12,12 @@ class SimpleSmartScalersRegistry:
         """
         Create a new registry of smart scaling agents.
         """
-        self._registry = {}
+        self._registry = {}  # smart_scaler_name: smart_scaler_resource
 
-    def values(self):
+    def names(self):
+        return self._registry.keys()
+
+    def resources(self):
         return self._registry.values()
 
     def __iter__(self):

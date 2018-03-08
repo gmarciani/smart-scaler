@@ -9,21 +9,21 @@ class DatabaseTestCase(unittest.TestCase):
     def setUp(self):
         """
         Setup the application.
-        :return: None
+        :return: None.
         """
         self.app = app.test_client()
 
     def tearDown(self):
         """
         Teardown the application.
-        :return: None
+        :return: None.
         """
         pass
 
     def test_crud(self):
         """
         Test the CRUD of entries.
-        :return:
+        :return: None.
         """
         key = "key_1"
         value = "val_1"

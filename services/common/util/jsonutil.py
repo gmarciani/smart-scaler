@@ -3,6 +3,7 @@ from flask import json
 import inspect
 from enum import Enum
 
+
 def output_json(data, code, headers=None):
     """
     Response layer for JSON.

@@ -1,6 +1,7 @@
 from services.redis_simulator.model.database import init_database
 import logging
 
+# Configure logger
 logger = logging.getLogger(__name__)
 
 

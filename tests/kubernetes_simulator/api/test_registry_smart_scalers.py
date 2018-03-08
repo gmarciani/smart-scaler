@@ -33,6 +33,7 @@ class RegistrySmartScalersTestCase(unittest.TestCase):
             min_replicas=1,
             max_replicas=10,
             ai_technique="QLEARNING",
+            rewarding_function="reward_naive",
             state_granularity=10,
             state_precision=5,
             action_magnitude=1,

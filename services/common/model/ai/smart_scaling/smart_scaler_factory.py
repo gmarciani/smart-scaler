@@ -2,7 +2,6 @@ from services.common.model.ai.ai_techniques import AITechnique
 from services.common.model.ai.smart_scaling.smart_scaling_agent import SmartScalerQLearning
 import logging
 
-
 # Configure logger
 logger = logging.getLogger(__name__)
 

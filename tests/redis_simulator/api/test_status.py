@@ -8,21 +8,21 @@ class StatusTestCase(unittest.TestCase):
     def setUp(self):
         """
         Setup the application.
-        :return: None
+        :return: None.
         """
         self.app = app.test_client()
 
     def tearDown(self):
         """
         Teardown the application.
-        :return: None
+        :return: None.
         """
         pass
 
     def test_status_get(self):
         """
         Test the REST interface 'GET /status'
-        :return:
+        :return: None.
         """
         rv = self.app.get("/status")
         self.assertTrue(responses.match_status(rv, 200), "HTTP status code mismatch")

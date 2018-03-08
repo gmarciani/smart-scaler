@@ -7,7 +7,7 @@ from services.agents_manager.control import smart_scalers as smart_scalers_ctrl
 from services.common.model.environment.scheduler import SimpleSchedulerJob as SchedulerJob
 import logging
 
-
+# Configure logger
 logger = logging.getLogger(__name__)
 
 

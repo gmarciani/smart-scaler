@@ -1,6 +1,7 @@
 from services.kubernetes_simulator.model.registry import SimpleKubernetesRegistry as KubernetesRegistry
 import logging
 
+# Configure logger
 logger = logging.getLogger(__name__)
 
 

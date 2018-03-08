@@ -4,7 +4,7 @@ import requests
 import json
 import logging
 
-
+# Configure logger
 logger = logging.getLogger(__name__)
 
 

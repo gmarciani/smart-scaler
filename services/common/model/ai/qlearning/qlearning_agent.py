@@ -5,10 +5,9 @@ from json import dumps as json_dumps
 from json import loads as json_loads
 import random
 import itertools
-import logging
 from services.common.util.sysutil import import_string as import_string
 import pickle
-
+import logging
 
 # Configure logger
 logger = logging.getLogger(__name__)

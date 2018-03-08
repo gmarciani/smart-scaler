@@ -33,7 +33,7 @@ def compose_status_respose(statuses):
     :return: (dict) the response.
     """
     return dict(
-        status="OK" if all(map(lambda x: x["status"] == "OK", statuses.values())) else "FAILED",
+        status="OK" if all(map(lambda x: x["status"] == "OK", statuses.resources())) else "FAILED",
         services=statuses)
 
 

@@ -98,7 +98,7 @@ class Pods(Resource):
             raise NotFound("Cannot find pod {}".format(pod_name))
 
         smart_scaler_name_to_delete = next(
-            (x.name for x in registry_ctrl.get_registry().get_smart_scalers().values() if x.pod_name == pod_name), None)
+            (x.name for x in registry_ctrl.get_registry().get_smart_scalers() if x.pod_name == pod_name), None)
 
         smart_scaler_deleted = None
         if smart_scaler_name_to_delete is not None:

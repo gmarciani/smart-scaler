@@ -1,14 +1,10 @@
 import pickle
-from services.common.model.ai.smart_scaling import states
-from services.common.model.ai.smart_scaling import actions_utils
 from services.common.model.ai.smart_scaling import agent_factory
-from services.common.model.ai.qlearning.qlearning_agent import QLearningAgent
 from services.common.util import mathutil
 from services.common.util.jsonutil import SimpleJSONEncoder as JSONEncoder
 from json import dumps as json_dumps
 from json import loads as json_loads
 import logging
-
 
 # Configure logger
 logger = logging.getLogger(__name__)

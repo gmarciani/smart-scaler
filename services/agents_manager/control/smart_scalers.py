@@ -5,7 +5,6 @@ from services.agents_manager.model.smart_scalers_registry import SimpleSmartScal
 from services.common.model.ai.smart_scaling.smart_scaling_agent import SmartScalerQLearning
 import logging
 
-
 # Configure logger
 logger = logging.getLogger(__name__)
 
@@ -21,32 +20,34 @@ def get_local_registry():
     return SMART_SCALERS_REGISTRY
 
 
-def update_registry(smart_scalers_local, kubernetes_conn, repository_conn):
+def update_registry(smart_scaler_resources_local, kubernetes_conn, repository_conn):
     """
     Update the agents registry pulling currently active Smart Scalers on Kubernetes.
-    :param smart_scalers_local: (dict) the repository of agents ({smart_scaler_name: agent}).
+    :param smart_scaler_resources_local: (SimpleSmartScalersRegistry) the local repository of smart scalers.
     :param kubernetes_conn: (SimpleConnection) the connection to Kubernetes.
     :param repository_conn: (SimpleConnection) the connection to the repository.
     :return: None
     """
-    smart_scalers_resources_remote = kubernetes_ctrl.get_all_smart_scalers(kubernetes_conn)
+    smart_scaler_resources_remote = kubernetes_ctrl.get_all_smart_scalers(kubernetes_conn)
 
-    smart_scalers_to_remove = list(set(map(lambda smart_scaler_name: smart_scaler_name, smart_scalers_local)) - set(
-        map(lambda smart_scaler_resource: smart_scaler_resource.name, smart_scalers_resources_remote)))
+    smart_scaler_names_to_remove = list(
+        set(smart_scaler_resources_local.names()) -
+        set(map(lambda smart_scaler_resource: smart_scaler_resource.name, smart_scaler_resources_remote))
+    )
 
-    smart_scalers_resource_to_add = list(
-        filter(lambda smart_scaler: smart_scaler.resource not in smart_scalers_local.values(), smart_scalers_resources_remote))
+    smart_scaler_resources_to_add = list(
+        filter(lambda smart_scaler: smart_scaler.resource.name not in smart_scaler_resources_local.names(), smart_scaler_resources_remote)
+    )
 
-    logger.debug("Smart Scaler(s) REMOTE (resources): {}".format(smart_scalers_resources_remote))
-    logger.debug("Smart Scaler(s) TO REMOVE LOCALLY (names): {}".format(smart_scalers_to_remove))
-    logger.debug("Smart Scaler(s) TO ADD LOCALLY (resources): {}".format(smart_scalers_resource_to_add))
+    logger.debug("Smart Scaler(s) REMOTE (resources): {}".format(smart_scaler_resources_remote))
+    logger.debug("Smart Scaler(s) TO REMOVE LOCALLY (names): {}".format(smart_scaler_names_to_remove))
+    logger.debug("Smart Scaler(s) TO ADD LOCALLY (resources): {}".format(smart_scaler_resources_to_add))
 
-    for smart_scaler_name in smart_scalers_to_remove:
-        delete_smart_scaler(smart_scalers_local, smart_scaler_name, repository_conn)
+    for smart_scaler_name in smart_scaler_names_to_remove:
+        delete_smart_scaler(smart_scaler_resources_local, smart_scaler_name, repository_conn)
 
-    for smart_scaler_resource in smart_scalers_resource_to_add:
-        smart_scaler = SmartScalerQLearning()
-        add_smart_scaler(smart_scalers_local, smart_scaler_resource, repository_conn)
+    for smart_scaler_resource in smart_scaler_resources_to_add:
+        add_smart_scaler(smart_scaler_resources_local, smart_scaler_resource, repository_conn)
 
 
 def apply_scaling(agent, kubernetes_conn):
@@ -67,37 +68,37 @@ def apply_scaling(agent, kubernetes_conn):
     kubernetes_ctrl.set_pod_replicas(kubernetes_conn, pod_name, new_replicas)
 
 
-def add_smart_scaler(smart_scalers_local, smart_scaler, repository_conn, max_attempts=3):
+def add_smart_scaler(smart_scalers_local, smart_scaler_resource, repository_conn, max_attempts=3):
     """
-    Add a smart scaler.
-    :param smart_scalers_local: (dict) the repository of agents ({smart_scaler_name: agent}).
-    :param smart_scaler: the smart scaler.
+    Add a smart scaler resource.
+    :param smart_scalers_local: (SimpleSmartScalersRegistry) the local repository of smart scalers.
+    :param smart_scaler_resource: (SmartScalerResource) the smart scaler resource.
     :param repository_conn: (SimpleConnection) the connection to the repository.
     :param max_attempts: (int) the maximum number of attempts.
     :return: None
     """
-    initialized = repository_ctrl.get_key(repository_conn, smart_scaler.name) is not None
+    initialized = repository_ctrl.get_key(repository_conn, smart_scaler_resource.name) is not None
 
     if initialized:
-        logger.debug("Smart scaler {} is already present in remote repository".format(smart_scaler.name))
+        logger.debug("Smart scaler {} is already present in remote repository".format(smart_scaler_resource.name))
     else:
-        logger.debug("Smart scaler {} is not yet present in remote repository".format(smart_scaler.name))
+        logger.debug("Smart scaler {} is not yet present in remote repository".format(smart_scaler_resource.name))
 
     attempts = 0
     while not initialized and attempts < max_attempts:
         attempts += 1
         logger.debug(
-            "Adding smart scaler {} to remote repository: attempt {}/{}".format(smart_scaler.name, attempts, max_attempts))
+            "Adding smart scaler {} to remote repository: attempt {}/{}".format(smart_scaler_resource.name, attempts, max_attempts))
         try:
-            repository_ctrl.set_key(repository_conn, smart_scaler.name, smart_scaler.to_binarys(), unique=True)
-            logger.debug("Added smart scaler {} to remote repository".format(smart_scaler.name))
+            repository_ctrl.set_key(repository_conn, smart_scaler_resource.name, smart_scaler_resource.to_binarys(), unique=True)
+            logger.debug("Added smart scaler {} to remote repository".format(smart_scaler_resource.name))
             initialized = True
         except RepositoryException as exc:
             logger.warning("Error from Repository: {}".format(exc.message))
 
     if initialized:
-        smart_scalers_local[smart_scaler.name] = smart_scaler
-        logger.debug("Added smart scaler {}".format(smart_scaler))
+        smart_scalers_local[smart_scaler_resource.name] = smart_scaler_resource
+        logger.debug("Added smart scaler {}".format(smart_scaler_resource))
 
 
 def delete_smart_scaler(smart_scalers_local, smart_scaler_name, repository_conn, max_attempts=3):

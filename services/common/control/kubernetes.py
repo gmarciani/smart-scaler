@@ -6,15 +6,15 @@ import requests
 import json
 import logging
 
-
+# Configure logger
 logger = logging.getLogger(__name__)
 
 
 def get_all_smart_scalers(kubernetes_conn):
     """
-    Get the list of smart scalers.
+    Get the list of smart scaler resources.
     :param kubernetes_conn: (SimpleConnection) the connection to Kubernetes.
-    :return: (list) the list of smart scalers.
+    :return: (list(SmartScalerResource)) the list of smart scaler resources.
     """
     url = conn_ctrl.format_url("registry/smart_scalers", kubernetes_conn)
 
@@ -25,7 +25,7 @@ def get_all_smart_scalers(kubernetes_conn):
         raise KubernetesException(500, "get_all_smart_scalers: " + str(exc))
 
     if response.status_code != 200:
-        raise KubernetesException(response.status_code, response_json["error"])
+        raise KubernetesException(response.status_code, "get_all_smart_scalers: " + response_json["error"])
 
     smart_scalers = []
 
@@ -53,7 +53,7 @@ def get_all_pods(kubernetes_conn):
         raise KubernetesException(500, "get_all_kube_pods: " + str(exc))
 
     if response.status_code != 200:
-        raise KubernetesException(response.status_code, response_json["error"])
+        raise KubernetesException(response.status_code, "get_all_kube_pods: " + response_json["error"])
 
     pods = []
 
@@ -84,7 +84,7 @@ def get_pod(kubernetes_conn, pod_name):
         raise KubernetesException(500, "get_pod_status: " + str(exc))
 
     if response.status_code != 200:
-        raise KubernetesException(response.status_code, response_json["error"])
+        raise KubernetesException(response.status_code, "get_pod_status: " + response_json["error"])
 
     s = response_json["pod"]
     try:
@@ -112,6 +112,6 @@ def set_pod_replicas(kubernetes_conn, pod_name, replicas):
         raise KubernetesException(500, "set_pod_replicas: " + str(exc))
 
     if response.status_code != 200:
-        raise KubernetesException(response.status_code, response_json["error"])
+        raise KubernetesException(response.status_code, "set_pod_replicas: " + response_json["error"])
 
     return response_json["replicas_old"], response_json["pod_scaled"]["replicas"]

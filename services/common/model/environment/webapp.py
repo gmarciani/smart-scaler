@@ -10,8 +10,9 @@ from services.common.util.jsonutil import output_json as output_json, SimpleJSON
 import atexit
 import logging
 
+from services.common.util.logutils import ConsoleHandler
 
-FORMAT = "%(levelname)s [%(name)s:%(lineno)s - %(funcName)30s] %(message)s"
+FORMATTER = logging.Formatter("%(levelname)-6s [%(name)-50s:%(lineno)s] %(message)s")
 
 REPRESENTATIONS = [("application/json", output_json)]
 
@@ -42,15 +43,14 @@ class WebApp(Flask):
 
         # Logging
         level = logging._nameToLevel[self.config["LOG_LEVEL"]]
-        frmt = logging.Formatter(FORMAT)
 
-        logging.basicConfig(level=level, format=FORMAT)
+        logging.basicConfig(level=level, handlers=[ConsoleHandler(level, FORMATTER)])
         logging.getLogger("apscheduler.scheduler").setLevel(logging.WARNING)
         logging.getLogger("apscheduler.executors.default").setLevel(logging.WARNING)
         logging.getLogger("urllib3").setLevel(logging.FATAL)
         self.logger.setLevel(level)
         for hdlr in self.logger.handlers:
-            hdlr.setFormatter(frmt)
+            hdlr.setFormatter(FORMATTER)
 
         # Scheduler
         self.scheduler = None

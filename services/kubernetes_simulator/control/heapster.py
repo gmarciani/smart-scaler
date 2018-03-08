@@ -1,6 +1,7 @@
 from services.kubernetes_simulator.model.heapster import SimpleKubernetesHeapster as KubernetesHeapster
 import logging
 
+# Configure logger
 logger = logging.getLogger(__name__)
 
 
