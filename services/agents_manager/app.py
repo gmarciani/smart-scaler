@@ -1,3 +1,6 @@
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../"))
+
 from services.common.model.environment.webapp import WebApp as App
 from services.agents_manager.control.smart_scaling_loop import smart_scaling_loop_job as smart_scaling_loop_job
 from services.agents_manager.config import Debug as AppConfig

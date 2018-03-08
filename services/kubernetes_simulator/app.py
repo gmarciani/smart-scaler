@@ -1,3 +1,6 @@
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../"))
+
 from services.common.model.environment.webapp import WebApp as App
 from services.kubernetes_simulator.config import Debug as AppConfig
 from services.kubernetes_simulator.api.status import Status
