@@ -1,3 +1,8 @@
+"""
+The REST API that realizes status management.
+"""
+
+
 from flask_restful import Resource
 from services.common.control import status as status_ctrl
 

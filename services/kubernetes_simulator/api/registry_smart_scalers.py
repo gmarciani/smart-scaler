@@ -1,3 +1,8 @@
+"""
+The REST API that realizes Kubernetes Registry (Smart Scalers) management.
+"""
+
+
 from flask_restful import Resource
 from flask import request
 from services.common.model.resources.smart_scaler_resource import SmartScalerResource

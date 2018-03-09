@@ -3,7 +3,7 @@ from services.common.model.exceptions.service_exception import KubernetesExcepti
 from services.common.model.exceptions.service_exception import RepositoryException
 from services.common.control import connections as connections_ctrl
 from apscheduler.triggers.interval import IntervalTrigger
-from services.agents_manager.control import smart_scalers as smart_scalers_ctrl
+from services.agents_manager.control import registry as smart_scalers_ctrl
 from services.common.model.environment.scheduler import SimpleSchedulerJob as SchedulerJob
 import logging
 
@@ -32,20 +32,15 @@ def smart_scaling_loop(ctx):
     logger.info("-" * 25)
 
     with ctx:
-        kubernetes_conn = connections_ctrl.get_service_connection("kubernetes")
-        repository_conn = connections_ctrl.get_service_connection("repository")
+        kubernetes_conn = connections_ctrl.get_connection("kubernetes")
+        repository_conn = connections_ctrl.get_connection("repository")
 
-    smart_scalers = smart_scalers_ctrl.get_local_registry()
+    local_registry = smart_scalers_ctrl.get_local_registry()
 
     try:
-        logger.debug("Smart scalers (before update): {}".format(smart_scalers))
-        smart_scalers_ctrl.update_registry(smart_scalers, kubernetes_conn, repository_conn)
-        logger.debug("Smart scalers (after update): {}".format(smart_scalers))
-        #for smart_scaler in smart_scalers.values():
-        #    logger.debug("Executing smart scaling fr smart scaler {}".format(smart_scaler.name))
-            #smart_scalers_ctrl.load_smart_scaler(smart_scaler, repository_conn)
-        #    smart_scalers_ctrl.apply_scaling(smart_scaler, kubernetes_conn)
-            #smart_scalers_ctrl.store_smart_scaler(smart_scaler, repository_conn)
+        logger.debug("Smart scalers (before update): {}".format(local_registry))
+        smart_scalers_ctrl.update_registry(local_registry, kubernetes_conn, repository_conn)
+        logger.debug("Smart scalers (after update): {}".format(local_registry))
     except KubernetesException as exc:
         logger.warning("Error from Kubernetes: {}".format(exc.message))
         return

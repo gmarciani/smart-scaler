@@ -1,5 +1,5 @@
 """
-Configurations for the service 'Kubernetes Simulator'.
+Configurations for the service 'Agent'.
 """
 
 
@@ -11,8 +11,18 @@ class Default:
 
     LOG_LEVEL = "INFO"
 
+    API_GATEWAY_HOST = "localhost"
+    API_GATEWAY_PORT = 18001
+
+    AGENTS_MANAGER_HOST = "localhost"
+    AGENTS_MANAGER_PORT = 18002
+
     KUBERNETES_HOST = "localhost"
     KUBERNETES_PORT = 18008
+    KUBERNETES_PULL = 20  # seconds
+
+    REPOSITORY_HOST = "localhost"
+    REPOSITORY_PORT = 18009
 
 
 class Debug(Default):

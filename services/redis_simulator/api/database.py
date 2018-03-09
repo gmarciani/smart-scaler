@@ -1,3 +1,8 @@
+"""
+The REST API that realizes database management.
+"""
+
+
 from flask_restful import Resource
 from flask import request
 from services.common.model.exceptions.rest_exceptions import NotFound, BadRequest

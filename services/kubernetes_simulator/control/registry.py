@@ -1,10 +1,17 @@
+"""
+The control layer for Kubernetes Registry management.
+"""
+
+
 from services.kubernetes_simulator.model.registry import SimpleKubernetesRegistry as KubernetesRegistry
 import logging
 
-# Configure logger
+
+# Logging
 logger = logging.getLogger(__name__)
 
 
+# Constants
 REGISTRY = KubernetesRegistry()
 
 

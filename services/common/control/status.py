@@ -9,7 +9,7 @@ def get_statuses(services):
     :param services: (list) list of services names.
     :return: (dict) a dictionary {service_name: status}.
     """
-    return dict([(service, get_status_service(conn_ctrl.get_service_connection(service))) for service in services])
+    return dict([(service, get_status_service(conn_ctrl.get_connection(service))) for service in services])
 
 
 def get_status_service(service_conn):

@@ -1,5 +1,5 @@
 """
-Configurations for service ApiGateway
+Configurations for the service 'API Gateway'.
 """
 
 

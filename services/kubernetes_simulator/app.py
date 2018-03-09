@@ -1,5 +1,11 @@
-import sys, os
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../"))
+"""
+The Flask application that realizes the service 'Kubernetes Simulator'.
+"""
+
+
+from sys import path as pythonpath
+from os.path import join, dirname, realpath
+pythonpath.append(join(dirname(realpath(__file__)), "../../"))
 
 from services.common.model.environment.webapp import WebApp as App
 from services.kubernetes_simulator.config import Debug as AppConfig

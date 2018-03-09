@@ -1,5 +1,5 @@
 """
-Configurations for service RepoManager
+Configurations for the service 'Redis Simulator'.
 """
 
 

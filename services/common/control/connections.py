@@ -37,7 +37,7 @@ def format_url(rest_interface, connection, protocol="http"):
     return "{}://{}:{}/{}".format(protocol, connection.host, connection.port, rest_interface)
 
 
-def get_service_connection(service_name):
+def get_connection(service_name):
     """
     Get the connection to the specified service.
     :param service_name: (string) the service name.

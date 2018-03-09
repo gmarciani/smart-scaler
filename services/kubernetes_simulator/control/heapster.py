@@ -1,10 +1,17 @@
+"""
+The control layer for Heapster management.
+"""
+
+
 from services.kubernetes_simulator.model.heapster import SimpleKubernetesHeapster as KubernetesHeapster
 import logging
 
-# Configure logger
+
+# Logging
 logger = logging.getLogger(__name__)
 
 
+# Constants
 HEAPSTER = KubernetesHeapster()
 
 

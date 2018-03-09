@@ -1,3 +1,8 @@
+"""
+The REST API that realizes Kubernetes Registry (Pods) management.
+"""
+
+
 from flask_restful import Resource
 from flask import request
 from services.common.model.resources.pod_resource import PodResource
