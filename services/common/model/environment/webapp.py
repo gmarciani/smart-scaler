@@ -12,7 +12,7 @@ import logging
 
 from services.common.util.logutils import ConsoleHandler
 
-FORMATTER = logging.Formatter("%(levelname)-6s [%(name)-50s:%(lineno)s] %(message)s")
+FORMATTER = logging.Formatter("%(asctime)s %(levelname)-6s [%(name)-50s:%(lineno)s] %(message)s")
 
 REPRESENTATIONS = [("application/json", output_json)]
 
@@ -45,9 +45,10 @@ class WebApp(Flask):
         level = logging._nameToLevel[self.config["LOG_LEVEL"]]
 
         logging.basicConfig(level=level, handlers=[ConsoleHandler(level, FORMATTER)])
-        logging.getLogger("apscheduler.scheduler").setLevel(logging.WARNING)
-        logging.getLogger("apscheduler.executors.default").setLevel(logging.WARNING)
-        logging.getLogger("urllib3").setLevel(logging.FATAL)
+        logging.getLogger("apscheduler.scheduler").setLevel(logging.ERROR)
+        logging.getLogger("apscheduler.executors.default").setLevel(logging.ERROR)
+        logging.getLogger("urllib3").setLevel(logging.ERROR)
+        logging.getLogger("redis_lock").setLevel(logging.ERROR)
         self.logger.setLevel(level)
         for hdlr in self.logger.handlers:
             hdlr.setFormatter(FORMATTER)

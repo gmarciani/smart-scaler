@@ -1,5 +1,5 @@
 """
-The REST API that realizes status management.
+The REST API for the service status management.
 """
 
 
@@ -9,12 +9,16 @@ from services.common.control import status as status_ctrl
 
 class Status(Resource):
     """
-    Status of the service.
+    The Flask resource realizing the REST API for the service status management.
     """
 
     def get(self):
         """
         Get the status of the service.
-        :return: the status of the service.
+
+        Returns
+        -------
+        res : dict
+            The response.
         """
         return status_ctrl.compose_status_fake()

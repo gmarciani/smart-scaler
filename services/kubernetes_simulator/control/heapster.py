@@ -1,9 +1,9 @@
 """
-The control layer for Heapster management.
+The control layer for the Heapster management.
 """
 
 
-from services.kubernetes_simulator.model.heapster import SimpleKubernetesHeapster as KubernetesHeapster
+from services.kubernetes_simulator.model.heapster import SimpleHeapsterRegistry as KubernetesHeapster
 import logging
 
 
@@ -20,12 +20,7 @@ def get_heapster():
     Retrieve Kubernetes Heapster.
     :return: (dict) Kubernetes Heapster.
     """
-    #logger.debug("Getting Heapster")
     return HEAPSTER
-    #heapster = getattr(g, "_heapster", None)
-    #if heapster is None:
-    #    heapster = g._heapster = heapster_connect()
-    #return heapster
 
 
 def teardown_heapster(exc):
@@ -34,8 +29,4 @@ def teardown_heapster(exc):
     :param exc: the exception passed by the middleware during teardown process.
     :return: None
     """
-    #logger.debug("Tearing down Heapster")
     pass
-    #heapster = getattr(g, "_heapster", None)
-    #if heapster is not None:
-    #   heapster.close()

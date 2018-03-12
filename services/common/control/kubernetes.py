@@ -114,4 +114,4 @@ def set_pod_replicas(kubernetes_conn, pod_name, replicas):
     if response.status_code != 200:
         raise KubernetesException(response.status_code, "set_pod_replicas: " + response_json["error"])
 
-    return response_json["replicas_old"], response_json["pod_scaled"]["replicas"]
+    return response_json["pod_old"]["replicas"], response_json["pod"]["replicas"]

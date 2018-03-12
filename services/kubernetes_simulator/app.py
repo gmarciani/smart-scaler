@@ -15,6 +15,7 @@ from services.kubernetes_simulator.api.registry_smart_scalers import SmartScaler
 from services.kubernetes_simulator.api.heapster import PodMetrics
 from services.kubernetes_simulator.control import heapster as heapster_ctrl
 from services.kubernetes_simulator.control import registry as registry_ctrl
+from sys import argv
 
 
 # Initialization
@@ -35,4 +36,6 @@ app.add_shutdown_hook(lambda: print("Goodbye!"))
 
 
 if __name__ == "__main__":
+    if len(argv) > 1:
+        app.config["KUBERNETES_PORT"] = int(argv[1])
     app.start(port=app.config["KUBERNETES_PORT"])

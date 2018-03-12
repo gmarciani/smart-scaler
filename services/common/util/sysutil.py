@@ -1,4 +1,15 @@
 import sys
+from uuid import getnode as get_mac
+from os import getpid as get_pid
+
+
+
+def get_puid():
+    """
+    Compute the Process Unique Identifier.
+    :return (str) the Process Unique Identifier.
+    """
+    return "{}@{}".format(get_mac(), get_pid())
 
 
 def import_string(import_name, silent=False):

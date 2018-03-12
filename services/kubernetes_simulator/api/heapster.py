@@ -1,5 +1,5 @@
 """
-The REST API that realizes Heapster management.
+The REST API for the Heapster management.
 """
 
 
@@ -12,13 +12,17 @@ from copy import deepcopy
 
 class PodMetrics(Resource):
     """
-    Metrics for Pods in Kubernetes.
+    The Flask resource realizing the REST API for the Heapster management.
     """
 
     def get(self):
         """
         Get metrics for a Pod.
-        :return: the response.
+
+        Returns
+        -------
+        res : dict
+            The response.
         """
         data = request.args
 
@@ -37,7 +41,11 @@ class PodMetrics(Resource):
     def patch(self):
         """
         Update metrics for a Pod.
-        :return:
+
+        Returns
+        -------
+        res : dict
+            The response.
         """
         data = request.get_json()
 

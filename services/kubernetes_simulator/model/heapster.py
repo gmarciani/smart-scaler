@@ -1,22 +1,31 @@
 """
-Simulation of Kubernetes Heapster.
+The model that realizes a Heapster Registry.
 """
 
 
-class SimpleKubernetesHeapster:
+class SimpleHeapsterRegistry:
     """
-    A simple Kubernetes Heapster.
+    A simple implementation of a Heapster Registry.
     """
 
     def __init__(self):
         """
-        Create a new Kubernetes Heapster.
+        Create a new instance of a Heapster Registry.
+
+        Returns
+        ----------
+        SimpleHeapsterRegistry
+            A new instance of a Heapster Registry.
         """
-        self._pods = {}
+        self._pods = {}  # pod_name: dict
 
     def get_pod_metrics(self):
         """
-        Retrieve metrics for Pods.
-        :return: metrics for Pods.
+        Retrieve all Pods metrics.
+
+        Returns
+        -------
+        dict
+            The dictionary containing all Pods metrics. Each Pod Metric is represented as a dictionary.
         """
         return self._pods

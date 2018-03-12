@@ -1,5 +1,5 @@
 """
-The REST API that realizes Kubernetes Registry (Pods) management.
+The REST API for the Kubernetes Registry (Pods) management.
 """
 
 
@@ -13,13 +13,17 @@ from copy import deepcopy
 
 class Pods(Resource):
     """
-    Pods in Kubernetes Registry.
+    The Flask resource realizing the REST API for the Kubernetes Registry (Pods) management.
     """
 
     def get(self):
         """
         Get all Pods or specific pod.
-        :return: the response.
+
+        Returns
+        -------
+        res : dict
+            The response.
         """
         data = request.args
 
@@ -39,7 +43,11 @@ class Pods(Resource):
     def put(self):
         """
         Create a new pod.
-        :return: the response
+
+        Returns
+        -------
+        res : dict
+            The response.
         """
         data = request.get_json()
 
@@ -61,7 +69,11 @@ class Pods(Resource):
     def patch(self):
         """
         Update the value of an existing pod.
-        :return: the response.
+
+        Returns
+        -------
+        res : dict
+            The response.
         """
         data = request.get_json()
 
@@ -87,7 +99,11 @@ class Pods(Resource):
     def delete(self):
         """
         Delete a pod.
-        :return: the response.
+
+        Returns
+        -------
+        res : dict
+            The response.
         """
         data = request.get_json()
 

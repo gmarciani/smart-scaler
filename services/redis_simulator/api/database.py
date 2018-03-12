@@ -1,5 +1,5 @@
 """
-The REST API that realizes database management.
+The REST API for the Redis Database management.
 """
 
 
@@ -11,12 +11,17 @@ from services.redis_simulator.control import database as database_ctrl
 
 class Database(Resource):
     """
-    Database.
+    The Flask resource realizing the REST API for the Redis Database management.
     """
+
     def get(self):
         """
         Get the value of the key.
-        :return: the response.
+
+        Returns
+        -------
+        res : dict
+            The response.
         """
         data = request.args
 
@@ -36,7 +41,11 @@ class Database(Resource):
     def post(self):
         """
         Set the value of the key.
-        :return: the response.
+
+        Returns
+        -------
+        res : dict
+            The response.
         """
         data = request.get_json()
 
@@ -70,7 +79,11 @@ class Database(Resource):
     def delete(self):
         """
         Delete the key.
-        :return: (json) the response.
+
+        Returns
+        -------
+        res : dict
+            The response.
         """
         data = request.get_json()
 

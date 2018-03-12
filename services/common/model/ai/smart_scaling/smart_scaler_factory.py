@@ -17,7 +17,6 @@ def create(resource):
     logger.debug("Creating a smart scaler with AI technique {}".format(ai_technique.name))
 
     if ai_technique is AITechnique.QLEARNING:
-        logger.debug("Creating a smart scaler with AI technique {}".format(ai_technique.name))
         scaler = SmartScalerQLearning(resource)
     else:
         raise ValueError("Cannot instantiate smart scaler with AI technique {}".format(ai_technique.name))

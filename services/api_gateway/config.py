@@ -12,18 +12,17 @@ class Default:
     LOG_LEVEL = "INFO"
 
     API_GATEWAY_HOST = "localhost"
-    API_GATEWAY_PORT = 18001
+    API_GATEWAY_PORT = 18002
 
-    AGENTS_MANAGER_HOST = "localhost"
-    AGENTS_MANAGER_PORT = 18002
+    AGENT_HOST = "localhost"
+    AGENT_PORT = 18003
 
     KUBERNETES_HOST = "localhost"
-    KUBERNETES_PORT = 18008
-    KUBERNETES_PULL = 10  # seconds
+    KUBERNETES_PORT = 18001
+    KUBERNETES_PULL = 20  # seconds
 
-    REPOSITORY_HOST = "localhost"
-    REPOSITORY_PORT = 18009
-
+    REPOSITORY_HOST = "172.17.0.2"
+    REPOSITORY_PORT = 6379
 
 class Debug(Default):
     """

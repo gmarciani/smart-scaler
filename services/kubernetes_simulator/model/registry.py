@@ -1,30 +1,43 @@
 """
-Simulation of Kubernetes Registry.
+The model that realizes a Kubernetes Registry.
 """
 
 
 class SimpleKubernetesRegistry:
     """
-    A simple Kubernetes Registry.
+    A simple implementation of a Kubernetes Registry.
     """
 
     def __init__(self):
         """
-        Create a new Kubernetes Registry.
+        Create a new instance of a Kubernetes Registry.
+
+        Returns
+        ----------
+        SimpleKubernetesRegistry
+            A new instance of a Kubernetes Registry.
         """
         self._pods = {}
         self._smart_scalers = {}
 
     def get_pods(self):
         """
-        Retrieve pods.
-        :return: pods.
+        Retrieve all Pods resources.
+
+        Returns
+        -------
+        dict
+            The dictionary of Pods resources (PodResource).
         """
         return self._pods
 
     def get_smart_scalers(self):
         """
-        Retrieve smart scalers.
-        :return: smart scalers.
+        Retrieve all Smart Scaler resources.
+
+        Returns
+        -------
+        dict
+            The dictionary of Smart Scaler resources (SmartScalerResource).
         """
         return self._smart_scalers

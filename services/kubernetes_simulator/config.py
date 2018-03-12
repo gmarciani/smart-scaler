@@ -12,7 +12,7 @@ class Default:
     LOG_LEVEL = "INFO"
 
     KUBERNETES_HOST = "localhost"
-    KUBERNETES_PORT = 18008
+    KUBERNETES_PORT = 18001
 
 
 class Debug(Default):

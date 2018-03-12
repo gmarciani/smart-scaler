@@ -1,5 +1,5 @@
 """
-The control layer for Kubernetes Registry management.
+The control layer for the Kubernetes Registry management.
 """
 
 
@@ -17,25 +17,23 @@ REGISTRY = KubernetesRegistry()
 
 def get_registry():
     """
-    Retrieve the registry.
-    :return: (dict) the registry.
+    Retrieve the Kubernetes Registry.
+
+    Returns
+    -------
+    SimpleKubernetesRegistry
+        The Kubernetes Registry.
     """
-    #logger.info("Getting Registry")
     return REGISTRY
-    #registry = getattr(g, "_registry", None)
-    #if registry is None:
-    #    registry = g._registry = registry_connect()
-    #return registry
 
 
-def teardown_registry(exc):
+def teardown_registry(e):
     """
-    Teardown the registry.
-    :param exc: the exception passed by the middleware during teardown process.
-    :return: (void)
+    Teardown the Kubernetes Registry.
+
+    Parameters
+    ----------
+    e : Exception
+        The exception passed by the middleware during teardown process.
     """
-    #logger.debug("Tearing down Registry")
     pass
-    #registry = getattr(g, "_registry", None)
-    #if registry is not None:
-    #   registry.close()

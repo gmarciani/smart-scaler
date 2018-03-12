@@ -5,12 +5,12 @@ The model that realizes a Redis Database.
 
 class SimpleRedisDatabase(dict):
     """
-    A simple implementation of an Redis Database.
+    A simple implementation of a Redis Database.
     """
 
     def __init__(self, *args, **kwargs):
         """
-        Create a new Redis Database.
+        Create a new instance of a Redis Database.
 
         Parameters
         ----------
@@ -22,8 +22,8 @@ class SimpleRedisDatabase(dict):
 
         Returns
         ----------
-        : SimpleRedisDatabase
-            A new instance of Redis Database.
+        SimpleRedisDatabase
+            A new instance of a Redis Database.
         """
         super(SimpleRedisDatabase, self).__init__(*args, **kwargs)
 
@@ -33,7 +33,7 @@ class SimpleRedisDatabase(dict):
 
         Returns
         ----------
-        : str
+        str
             The string representation.
         """
         return "SimpleRedisDatabase({})".format(super(SimpleRedisDatabase, self).__str__())
@@ -44,7 +44,7 @@ class SimpleRedisDatabase(dict):
 
         Returns
         ----------
-        : str
+        str
             The string representation.
         """
         return super(SimpleRedisDatabase, self).__repr__()

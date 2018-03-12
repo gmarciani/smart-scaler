@@ -1,5 +1,5 @@
 """
-The REST API that realizes Kubernetes Registry (Smart Scalers) management.
+The REST API for the Kubernetes Registry (Smart Scalers) management.
 """
 
 
@@ -13,13 +13,17 @@ from copy import deepcopy
 
 class SmartScalers(Resource):
     """
-    Smart Scalers in Kubernetes Registry.
+    The Flask resource realizing the REST API for the Kubernetes Registry (Smart Scalers) management.
     """
 
     def get(self):
         """
         Get all Smart Scalers or specific Smart Scaler.
-        :return: the response.
+
+        Returns
+        -------
+        res : dict
+            The response.
         """
         data = request.args
 
@@ -39,7 +43,11 @@ class SmartScalers(Resource):
     def put(self):
         """
         Create a new Smart Scaler.
-        :return:
+
+        Returns
+        -------
+        res : dict
+            The response.
         """
         data = request.get_json()
 
@@ -78,7 +86,11 @@ class SmartScalers(Resource):
     def delete(self):
         """
         Delete a Smart Scaler.
-        :return:
+
+        Returns
+        -------
+        res : dict
+            The response.
         """
         data = request.get_json()
 

@@ -1,5 +1,5 @@
 """
-The control layer for Redis Database management.
+The control layer for the Redis Database management.
 """
 
 
@@ -17,11 +17,11 @@ DATABASE = RedisDatabase()
 
 def get_database():
     """
-    Retrieve the database.
+    Retrieve the Redis Database.
 
     Returns
     -------
-    : SimpleRedisDatabase
+    SimpleRedisDatabase
         The Redis Database.
     """
     return DATABASE
@@ -29,11 +29,11 @@ def get_database():
 
 def teardown_database(e):
     """
-    Teardown the database.
+    Teardown the Redis Database.
 
     Parameters
     ----------
-    e : exc
+    e : Exception
         The exception passed by the middleware during teardown process.
     """
     pass
