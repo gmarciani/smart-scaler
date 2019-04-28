@@ -1,0 +1,14 @@
+apiVersion: stable.gmarciani.com/v1
+kind: SmartScaler
+label:
+  app: Flasky
+metadata:
+  name: flasky-smartscaler
+spec:
+  deployment: flasky
+  algorithm: ReinforcementLearning1
+  parameters:
+    param1: value1
+    param2: 12345
+  minReplicas: 1
+  maxReplicas: 10

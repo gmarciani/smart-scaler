@@ -1,0 +1,69 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: smartscalers.stable.gmarciani.com
+spec:
+  group: stable.gmarciani.com
+  versions:
+    - name: v1
+      served: true
+      storage: true
+  scope: Namespaced
+  names:
+    kind: SmartScaler
+    singular: smartscaler
+    plural: smartscalers
+    shortNames:
+      - ss
+    categories:
+      - all
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      required:
+        - spec
+      properties:
+        spec:
+          properties:
+            deployment:
+              type: string
+              minLength: 1
+            algorithm:
+              type: string
+              minLength: 1
+            parameters:
+              type: object
+            replicas:
+              type: integer
+              minimum: 0
+            minReplicas:
+              type: integer
+              minimum: 0
+            maxReplicas:
+              type: integer
+              minimum: 0
+          required:
+            - deployment
+            - algorithm
+  additionalPrinterColumns:
+    - name: Deployment
+      type: string
+      description: The Deployment the Smart Scaler refers to. It is a required spec.
+      JSONPath: .spec.deployment
+    - name: Algorithm
+      type: string
+      description: The algorihtm the Smart Scaler implements. It is a required spec.
+      JSONPath: .spec.algorithm
+    - name: Replicas
+      type: integer
+      description: The number of replicas for the target deployment.
+      JSONPath: .spec.replicas
+    - name: MinReplicas
+      type: integer
+      description: The minimum number of replicas for a deployment.
+      JSONPath: .spec.minReplicas
+    - name: MaxReplicas
+      type: integer
+      description: The maximum number of replicas for a deployment.
+      JSONPath: .spec.maxReplicas
