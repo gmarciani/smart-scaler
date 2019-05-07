@@ -1,0 +1,21 @@
+apiVersion: metacontroller.k8s.io/v1alpha1
+kind: CompositeController
+metadata:
+  name: smartscaler-controller
+spec:
+  generateSelector: true
+  parentResource:
+    apiVersion: stable.gmarciani.com/v1
+    resource: smartscalers
+  childResources:
+  - apiVersion: v1
+    resource: pods
+    updateStrategy:
+      method: Recreate
+  hooks:
+    sync:
+      webhook:
+        url: http://smartscaler-controller.default/sync
+    finalize:
+      webhook:
+        url: http://smartscaler-controller.default/finalize

@@ -4,7 +4,7 @@ Version: 1.0.0
 Summary: A smart auto-scaling service for Kubernetes, leveraging Reinforcement Learning
 Home-page: https://gmarciani.github.io/smart-scaler
 Author: Giacomo Marciani
-Author-email: gmarciani@acm.org
+Author-email: mgiacomo@amazon.com
 License: MIT
 Download-URL: https://gmarciani.github.io/smart-scaler
 Description: A smart auto-scaling service for Kubernetes, leveraging Reinforcement Learning

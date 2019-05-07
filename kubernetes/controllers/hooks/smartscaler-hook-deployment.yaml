@@ -1,0 +1,27 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: smartscaler-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smartscaler-controller
+  template:
+    metadata:
+      labels:
+        app: smartscaler-controller
+    spec:
+      containers:
+      - name: controller
+        image: python:2.7
+        command: ["python", "/hooks/smartscaler-hooks-logic.py"]
+        ports:
+          - containerPort: 80
+        volumeMounts:
+        - name: hooks
+          mountPath: /hooks
+      volumes:
+      - name: hooks
+        configMap:
+          name: smartscaler-controller
