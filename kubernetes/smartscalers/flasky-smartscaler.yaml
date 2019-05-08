@@ -6,9 +6,8 @@ metadata:
   name: flasky-smartscaler
 spec:
   deployment: flasky
-  algorithm: ReinforcementLearning1
+  algorithm: Cyclic
   parameters:
-    param1: value1
-    param2: 12345
+    pace: 2
   minReplicas: 1
   maxReplicas: 10

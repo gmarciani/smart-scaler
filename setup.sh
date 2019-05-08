@@ -50,6 +50,7 @@ function installSmartScalerController {
 
 function uninstallSmartScalerController {
     echo "Uninstalling Smart Scaler Controller"
+    kubectl delete ss --all
     kubectl delete service ${SMARTSCALER_SERVICE_NAME}
     kubectl delete deployment ${SMARTSCALER_DEPLOYMENT_NAME}
     kubectl delete configmap ${SMARTSCALER_CONFIGMAP_NAME}
