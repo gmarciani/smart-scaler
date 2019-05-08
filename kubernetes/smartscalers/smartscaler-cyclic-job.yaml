@@ -1,0 +1,23 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: smartscaler-cyclic-job
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: smartscaler-cyclic
+              image: gmarciani/smartscaler_cyclic
+              env:
+                - name: SMARTSCALER_DEPLOYMENT
+                  value: "flasky"
+                - name: SMARTSCALER_PARAMETERS
+                  value: "{\"param1\":123}"
+                - name: SMARTSCALER_MIN_REPLICAS
+                  value: "1"
+                - name: SMARTSCALER_MAX_REPLICAS
+                  value: "10"

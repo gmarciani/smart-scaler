@@ -4,6 +4,7 @@ pythonpath.append(join(dirname(realpath(__file__)), "../"))
 
 import os
 import json
+from kubernetes import client, config
 from common.logutils import get_logger
 
 
@@ -25,6 +26,19 @@ def print_configuration():
     logger.info("Smart Scaler {} running with configuration: {}".format(SMARTSCALER_NAME, CONFIGURATION))
 
 
+def make_step():
+    config.load_incluster_config()
+
+    api = client.ExtensionsV1beta1Api()
+    logger.info("Getting Deployment: {}".format(CONFIGURATION['Deployment']))
+    try:
+        deployment = api.read_namespaced_deployment(CONFIGURATION['Deployment'], 'DEFAULT')
+        print("Deployment Details: {}".format(deployment))
+    except client.rest.ApiException as e:
+        logger.error("Cannot find Deployment {}".format(CONFIGURATION['Deployment']))
+
+
 if __name__ == "__main__":
     load_configuration()
     print_configuration()
+    make_step()
